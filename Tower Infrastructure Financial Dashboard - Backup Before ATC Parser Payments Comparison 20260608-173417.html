@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>ATC Towers Financial Dashboard</title>
+  <title>African Towers Financial Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -19,10 +19,6 @@
     .upload-btn:hover { background: #FFE08C; }
     .year-selector { background: #1A2533; border-radius: 48px; padding: 6px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #3A4A5C; }
     .year-selector label { font-weight: 700; color: #5DE4C7; font-size: 0.82rem; }
-    .company-selector { border-radius: 28px; padding: 8px 14px; gap: 10px; }
-    .company-selector .company-options { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .company-selector .company-options label { color: #E0ECF5; font-size: 0.76rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
-    .company-selector input { accent-color: #5DE4C7; }
     select { background: #2C3E4E; border: 1px solid #5A6F82; border-radius: 32px; padding: 8px 16px; font-weight: 600; color: white; cursor: pointer; }
     .status-badge { background: #00000030; color: #FFD966; padding: 7px 14px; border-radius: 60px; font-size: 0.75rem; border: 1px solid #FFD96630; font-weight: 800; }
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-bottom: 36px; }
@@ -83,21 +79,13 @@
   <div class="header">
     <div class="title-section">
       <h1><i class="fas fa-broadcast-tower" style="color:#FFD966;"></i> Tower Infrastructure Financial Dashboard</h1>
-      <p>Upload ATC tower financial extracts from the Financial Extracts workbook. Updated figures are compared, applied, and remembered in this browser.</p>
+      <p>Upload African Towers financial extracts with sheets named by year. Updated figures are compared, applied, and remembered in this browser.</p>
     </div>
     <div class="controls">
       <button class="upload-btn" id="uploadWorkbookBtn"><i class="fas fa-file-excel"></i> Upload Financial Extract</button>
       <div class="year-selector">
         <label><i class="fas fa-calendar-alt"></i> Year:</label>
         <select id="yearSelect"></select>
-      </div>
-      <div class="year-selector">
-        <label><i class="fas fa-code-compare"></i> Compare:</label>
-        <select id="compareYearSelect"></select>
-      </div>
-      <div class="year-selector company-selector">
-        <label><i class="fas fa-building"></i> Companies:</label>
-        <div class="company-options" id="companySelector"></div>
       </div>
       <div class="status-badge" id="dataStatus"><i class="fas fa-database"></i> Embedded data</div>
     </div>
@@ -157,39 +145,6 @@
     </div>
   </div>
 
-  <div class="insights-card">
-    <div class="insights-header">
-      <h3><i class="fas fa-receipt"></i> 1% Payment Analytics</h3>
-      <span class="insights-pill" id="paymentScope">Dashboard selection</span>
-    </div>
-    <div class="kpi-grid" id="paymentKpiContainer"></div>
-  </div>
-
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Invoiced vs Payment Received</h3>
-        <button class="download-btn" id="downloadPaymentBtn"><i class="fas fa-camera"></i> Download</button>
-      </div>
-      <canvas id="paymentChart"></canvas>
-    </div>
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Outstanding Balance</h3>
-        <button class="download-btn" id="downloadOutstandingBtn"><i class="fas fa-camera"></i> Download</button>
-      </div>
-      <canvas id="outstandingChart"></canvas>
-    </div>
-  </div>
-
-  <div class="chart-card full">
-    <div class="chart-header">
-      <h3>1% Payment Data</h3>
-      <button class="download-btn" id="downloadPaymentTableBtn"><i class="fas fa-download"></i> Export CSV</button>
-    </div>
-    <div class="financial-table-wrapper" id="paymentTableContainer"></div>
-  </div>
-
   <div class="chart-card full">
     <div class="chart-header">
       <h3>Complete Financial Data</h3>
@@ -234,11 +189,9 @@
 </div>
 
 <script>
-  const CACHE_KEY = "atcTowersFinancialDashboardSnapshot_v2";
-  const NOTES_KEY = "atcTowersFinancialDashboardNotes_v1";
-  const COMPANY_NAME = "ATC";
-  const COMPANIES = ["ATC"];
-  const companyColors = { "ATC": "#FFD966" };
+  const CACHE_KEY = "africanTowersFinancialDashboardSnapshot_v1";
+  const NOTES_KEY = "africanTowersFinancialDashboardNotes_v1";
+  const COMPANY_NAME = "African Towers";
   const metricRows = [
     { key: "revenue", label: "Revenue", type: "money", aliases: ["REVENUE"] },
     { key: "expenditure", label: "Expenditure", type: "money", aliases: ["EXPENDITURE"] },
@@ -261,21 +214,12 @@
     { key: "totalDebt", label: "Total Debt", type: "money", aliases: ["TOTAL DEBT"] },
     { key: "enterpriseValue", label: "Total Enterprise Value", type: "money", aliases: ["TOTAL ENTERPRISE VALUE", "ENTERPRISE VALUE"] }
   ];
-  const paymentRows = [
-    { key: "invoiced", label: "Invoiced", type: "money" },
-    { key: "paymentReceived", label: "Payment Received", type: "money" },
-    { key: "outstandingBalance", label: "Outstanding Balance", type: "money" },
-    { key: "collectionRate", label: "Collection Rate", type: "percent" }
-  ];
 
   const DEFAULT_PAYLOAD = {
     version: 1,
-    savedAt: "embedded-from-atc-towers-financial-extracts",
-    years: [2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    companies: ["ATC"],
+    savedAt: "embedded-from-african-towers-financial-extracts",
+    years: [2021, 2022, 2023, 2024, 2025],
     financial: {
-      "2019": emptyYear(),
-      "2020": emptyYear(),
       "2021": emptyYear(),
       "2022": {
         revenue: 1263611000, expenditure: 363501000, costOfSales: 446950000, grossProfit: 816661000,
@@ -302,22 +246,11 @@
         totalEquity: 1233829000, totalDebt: 1564441000, enterpriseValue: 2322264000
       },
       "2025": emptyYear()
-    },
-    payments: {
-      "2019": { invoiced: 0, paymentReceived: 6487795.78, outstandingBalance: -6487795.78, collectionRate: null },
-      "2020": { invoiced: 0, paymentReceived: 7834380.03, outstandingBalance: -7834380.03, collectionRate: null },
-      "2021": { invoiced: 0, paymentReceived: 22393511, outstandingBalance: -22393511, collectionRate: null },
-      "2022": { invoiced: 12636110, paymentReceived: 60705156, outstandingBalance: -48069046, collectionRate: 4.80410157872953 },
-      "2023": { invoiced: 14969000, paymentReceived: 14134826.64, outstandingBalance: 834173.36, collectionRate: 0.9442732740998063 },
-      "2024": { invoiced: 18104000, paymentReceived: 13269712.97, outstandingBalance: 4834287.03, collectionRate: 0.7329713306451613 },
-      "2025": { invoiced: 0, paymentReceived: 15995070.3, outstandingBalance: -15995070.3, collectionRate: null }
     }
   };
 
   let currentPayload = loadPayload() || DEFAULT_PAYLOAD;
   let financialData = currentPayload.financial || {};
-  let paymentData = currentPayload.payments || {};
-  let companiesList = currentPayload.companies || COMPANIES;
   let yearsList = normalizeYears(currentPayload.years || Object.keys(financialData));
   let charts = {};
 
@@ -343,22 +276,8 @@
     return metricRows.some(m => hasValue(d[m.key]));
   }
 
-  function hasPaymentData(year) {
-    const d = paymentData[String(year)] || {};
-    return paymentRows.some(m => hasValue(d[m.key]));
-  }
-
-  function hasAnyDashboardData(year) {
-    return hasAnyData(year) || hasPaymentData(year);
-  }
-
-  function getSelectedCompanies() {
-    const checked = Array.from(document.querySelectorAll(".tower-company-checkbox:checked")).map(input => input.value).filter(value => companiesList.includes(value));
-    return checked.length ? checked : companiesList;
-  }
-
   function populatedYears() {
-    return yearsList.filter(hasAnyDashboardData);
+    return yearsList.filter(hasAnyData);
   }
 
   function latestPopulatedYear() {
@@ -367,16 +286,13 @@
   }
 
   function selectedYear() {
-    return getDashboardYearSelection();
+    return document.getElementById("yearSelect").value || String(latestPopulatedYear() || "all");
   }
 
   function yearScope(yearValue) {
     if(yearValue === "all") return populatedYears();
-    if(String(yearValue).startsWith("compare:")) {
-      return String(yearValue).replace("compare:", "").split(",").map(Number).filter(y => yearsList.includes(y));
-    }
     const y = Number(yearValue);
-    return isNaN(y) ? populatedYears() : [y].filter(item => yearsList.includes(item));
+    return isNaN(y) ? populatedYears() : [y];
   }
 
   function moneyValue(v) {
@@ -425,46 +341,11 @@
     return hasValue(v) ? Number(v) / 1e6 : null;
   }
 
-  function getDashboardYearSelection() {
-    const primary = document.getElementById("yearSelect")?.value || "all";
-    const compare = document.getElementById("compareYearSelect")?.value || "";
-    if(primary !== "all" && compare && compare !== primary) {
-      return "compare:" + [Number(primary), Number(compare)].filter(y => !isNaN(y)).sort((a, b) => a - b).join(",");
-    }
-    return primary;
-  }
-
-  function selectionLabel(yearValue) {
-    const scope = yearScope(yearValue);
-    if(yearValue === "all") return scope.length ? `${Math.min(...scope)}-${Math.max(...scope)}` : "All Years";
-    if(String(yearValue).startsWith("compare:")) return scope.join(" vs ");
-    return String(yearValue);
-  }
-
-  function latestFinancialYearInScope(yearValue) {
-    const scope = yearScope(yearValue).filter(hasAnyData);
-    return scope.length ? Math.max(...scope) : latestPopulatedYear();
-  }
-
   function fillYearSelect() {
     const select = document.getElementById("yearSelect");
-    const compareSelect = document.getElementById("compareYearSelect");
     const current = select.value || String(latestPopulatedYear() || "all");
     select.innerHTML = '<option value="all">All Years</option>' + yearsList.map(y => `<option value="${y}">${y}</option>`).join("");
     select.value = yearsList.includes(Number(current)) || current === "all" ? current : String(latestPopulatedYear() || "all");
-    if(compareSelect) {
-      const compareCurrent = compareSelect.value || "";
-      compareSelect.innerHTML = '<option value="">No comparison</option>' + yearsList.map(y => `<option value="${y}">${y}</option>`).join("");
-      compareSelect.value = yearsList.includes(Number(compareCurrent)) ? compareCurrent : "";
-    }
-  }
-
-  function renderCompanySelector() {
-    const container = document.getElementById("companySelector");
-    if(!container) return;
-    const selected = new Set(getSelectedCompanies());
-    container.innerHTML = companiesList.map(company => `<label><input type="checkbox" class="tower-company-checkbox" value="${company}" ${selected.has(company) ? "checked" : ""}> ${company}</label>`).join("");
-    container.querySelectorAll(".tower-company-checkbox").forEach(input => input.addEventListener("change", renderAll));
   }
 
   function updateStatus() {
@@ -479,7 +360,7 @@
 
   function updateKpis(yearValue) {
     const scope = yearScope(yearValue);
-    const latest = latestFinancialYearInScope(yearValue);
+    const latest = yearValue === "all" ? latestPopulatedYear() : Number(yearValue);
     const d = financialData[String(latest)] || {};
     const prevYear = previousPopulatedYear(latest);
     const prev = prevYear ? financialData[String(prevYear)] || {} : {};
@@ -488,15 +369,13 @@
     const totalRevenue = scope.reduce((sum, y) => sum + (moneyValue(financialData[String(y)]?.revenue) || 0), 0);
     const totalProfit = scope.reduce((sum, y) => sum + (moneyValue(financialData[String(y)]?.netProfit) || 0), 0);
     const totalEbitda = scope.reduce((sum, y) => sum + (moneyValue(financialData[String(y)]?.ebitda) || 0), 0);
-    const isMultiYear = scope.length > 1;
-    const companyLabel = getSelectedCompanies().join(", ");
-    const cards = isMultiYear ? [
-      ["Revenue", formatMoney(totalRevenue), `${selectionLabel(yearValue)} total for ${companyLabel}`],
+    const cards = yearValue === "all" ? [
+      ["Revenue", formatMoney(totalRevenue), `${scope.length} populated year total`],
       ["EBITDA", formatMoney(totalEbitda), "Total EBITDA across selected years"],
       ["Net Profit", formatMoney(totalProfit), "Total net profit across selected years"],
       ["Latest Enterprise Value", formatMoney(d.enterpriseValue), `${latest || "N/A"} balance sheet signal`],
       ["Latest EBITDA Margin", formatPercent(d.ebitdaMargin), `${latest || "N/A"} operating margin`],
-      ["Companies Selected", String(getSelectedCompanies().length), companyLabel]
+      ["Latest Net Profit Margin", formatPercent(d.netProfitMargin), `${latest || "N/A"} profit conversion`]
     ] : [
       ["Revenue", formatMoney(d.revenue), revenueGrowth === null ? "No prior populated year for growth" : `${revenueGrowth.toFixed(1)}% vs ${prevYear}`],
       ["EBITDA", formatMoney(d.ebitda), `Margin: ${formatPercent(d.ebitdaMargin)}`],
@@ -511,16 +390,15 @@
   function updateInsights(yearValue) {
     const scopeEl = document.getElementById("insightsScope");
     const content = document.getElementById("insightsContent");
-    const scope = yearScope(yearValue);
-    const latest = latestFinancialYearInScope(yearValue);
+    const latest = yearValue === "all" ? latestPopulatedYear() : Number(yearValue);
     const d = financialData[String(latest)] || {};
     const prevYear = previousPopulatedYear(latest);
     const prev = prevYear ? financialData[String(prevYear)] || {} : {};
     const revenueGrowth = pctChange(d.revenue, prev.revenue);
     const profitGrowth = pctChange(d.netProfit, prev.netProfit);
-    scopeEl.textContent = `${getSelectedCompanies().join(", ")} | ${selectionLabel(yearValue)}`;
-    if(!scope.some(hasAnyData)) {
-      content.innerHTML = '<div class="insight-writeup"><p>No populated financial values are available for the selected financial scope. Upload a revised workbook if this year has been updated.</p></div>';
+    scopeEl.textContent = yearValue === "all" ? `All populated years through ${latest || "N/A"}` : `${latest}`;
+    if(!hasAnyData(latest)) {
+      content.innerHTML = '<div class="insight-writeup"><p>No populated financial values are available for the selected year. Upload a revised workbook if this year has been updated.</p></div>';
       return;
     }
     const debtToAssets = hasValue(d.totalDebt) && hasValue(d.totalAssets) && Number(d.totalAssets) !== 0 ? Number(d.totalDebt) / Number(d.totalAssets) : null;
@@ -530,7 +408,7 @@
     const profitNarrative = Number(d.netProfit) < 0 ? `net loss of <strong>${formatMoney(Math.abs(Number(d.netProfit)))}</strong>` : `net profit of <strong>${formatMoney(d.netProfit)}</strong>`;
     const marginNarrative = Number(d.netProfitMargin) < 0 ? `net loss margin is <strong>${formatPercent(Math.abs(Number(d.netProfitMargin)))}</strong>` : `net profit margin is <strong>${formatPercent(d.netProfitMargin)}</strong>`;
     const expenseInterpretation = expenseToRevenue === null ? "Operating expense-to-revenue analysis is unavailable for this year." : (expenseToRevenue >= 1 ? "Operating expenses are broadly equal to or above revenue, indicating significant cost pressure." : (expenseToRevenue >= 0.8 ? "Operating expenses remain high relative to revenue, even though they are below revenue." : "Operating expenses are comparatively contained relative to revenue."));
-    const selectedScopeYears = yearValue === "all" ? yearsList : scope;
+    const selectedScopeYears = yearValue === "all" ? yearsList : [Number(yearValue)];
     const availableScopeYears = selectedScopeYears.filter(y => hasAnyData(y));
     const missingScopeYears = selectedScopeYears.filter(y => !hasAnyData(y));
     const miniCards = [
@@ -549,15 +427,13 @@
   }
 
   function renderCharts(yearValue) {
-    const chartYears = yearScope(yearValue).filter(hasAnyData);
-    const labels = chartYears.length ? chartYears.map(String) : [String(latestFinancialYearInScope(yearValue))];
-    const isMultiYear = labels.length > 1;
+    const labels = yearValue === "all" ? populatedYears().map(String) : [String(yearValue)];
     const dataFor = key => labels.map(y => financialData[y]?.[key]);
     const moneyFor = key => labels.map(y => chartMoney(financialData[y]?.[key]));
     Object.values(charts).forEach(chart => chart.destroy());
     charts = {};
     charts.performance = new Chart(document.getElementById("performanceChart"), {
-      type: isMultiYear ? "line" : "bar",
+      type: yearValue === "all" ? "line" : "bar",
       data: { labels, datasets: [
         { label: "Revenue (GHS M)", data: moneyFor("revenue"), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 },
         { label: "EBITDA (GHS M)", data: moneyFor("ebitda"), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 },
@@ -566,7 +442,7 @@
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.margin = new Chart(document.getElementById("marginChart"), {
-      type: isMultiYear ? "line" : "bar",
+      type: yearValue === "all" ? "line" : "bar",
       data: { labels, datasets: [
         { label: "EBITDA Margin", data: dataFor("ebitdaMargin").map(v => hasValue(v) ? Number(v) * 100 : null), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 },
         { label: "Net Profit Margin", data: dataFor("netProfitMargin").map(v => hasValue(v) ? Number(v) * 100 : null), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 }
@@ -574,7 +450,7 @@
       options: { responsive: true, scales: { y: { title: { display: true, text: "Percent", color: "#FFD966" } } } }
     });
     charts.spend = new Chart(document.getElementById("spendChart"), {
-      type: isMultiYear ? "line" : "bar",
+      type: yearValue === "all" ? "line" : "bar",
       data: { labels, datasets: [
         { label: "Expenditure (GHS M)", data: moneyFor("expenditure"), borderColor: "#3498DB", backgroundColor: "#3498DB99", tension: 0.25 },
         { label: "Cost of Sales (GHS M)", data: moneyFor("costOfSales"), borderColor: "#E74C3C", backgroundColor: "#E74C3C99", tension: 0.25 },
@@ -583,7 +459,7 @@
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.balance = new Chart(document.getElementById("balanceChart"), {
-      type: isMultiYear ? "line" : "bar",
+      type: yearValue === "all" ? "line" : "bar",
       data: { labels, datasets: [
         { label: "Total Assets (GHS M)", data: moneyFor("totalAssets"), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 },
         { label: "Total Liabilities (GHS M)", data: moneyFor("totalLiabilities"), borderColor: "#E74C3C", backgroundColor: "#E74C3C99", tension: 0.25 },
@@ -593,7 +469,7 @@
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.enterprise = new Chart(document.getElementById("enterpriseChart"), {
-      type: isMultiYear ? "line" : "bar",
+      type: yearValue === "all" ? "line" : "bar",
       data: { labels, datasets: [
         { label: "Enterprise Value (GHS M)", data: moneyFor("enterpriseValue"), borderColor: "#FFD966", backgroundColor: "#FFD96699", fill: false, tension: 0.25 }
       ] },
@@ -601,73 +477,11 @@
     });
   }
 
-  function paymentYearsInScope(yearValue) {
-    return yearScope(yearValue).filter(hasPaymentData);
-  }
-
-  function renderPayments(yearValue) {
-    const scopeYears = paymentYearsInScope(yearValue);
-    const paymentScope = document.getElementById("paymentScope");
-    if(paymentScope) paymentScope.textContent = `${getSelectedCompanies().join(", ")} | ${selectionLabel(yearValue)}`;
-    const totalInvoiced = scopeYears.reduce((sum, y) => sum + (moneyValue(paymentData[String(y)]?.invoiced) || 0), 0);
-    const totalReceived = scopeYears.reduce((sum, y) => sum + (moneyValue(paymentData[String(y)]?.paymentReceived) || 0), 0);
-    const totalOutstanding = scopeYears.reduce((sum, y) => sum + (moneyValue(paymentData[String(y)]?.outstandingBalance) || 0), 0);
-    const collectionRate = totalInvoiced ? totalReceived / totalInvoiced : null;
-    const cards = [
-      ["Invoiced", formatMoney(totalInvoiced), `${scopeYears.length || 0} year(s) in selected scope`],
-      ["Payment Received", formatMoney(totalReceived), "Recorded 1% payments"],
-      ["Outstanding Balance", formatMoney(totalOutstanding), totalOutstanding < 0 ? "Payments exceed invoiced amount in this scope" : "Invoiced less payments received"],
-      ["Collection Rate", formatPercent(collectionRate), "Payment received divided by invoiced amount"]
-    ];
-    document.getElementById("paymentKpiContainer").innerHTML = cards.map(card => `<div class="kpi-card"><div class="kpi-title">${card[0]}</div><div class="kpi-value">${card[1]}</div><div class="kpi-sub">${card[2]}</div></div>`).join("");
-    renderPaymentCharts(yearValue, scopeYears);
-    buildPaymentTable(scopeYears);
-  }
-
-  function renderPaymentCharts(yearValue, scopeYears) {
-    const labels = scopeYears.length ? scopeYears.map(String) : [String(latestPopulatedYear())];
-    const isMultiYear = labels.length > 1;
-    if(charts.paymentChart) charts.paymentChart.destroy();
-    if(charts.outstandingChart) charts.outstandingChart.destroy();
-    charts.paymentChart = new Chart(document.getElementById("paymentChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: [
-        { label: "Invoiced (GHS M)", data: labels.map(y => chartMoney(paymentData[y]?.invoiced)), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 },
-        { label: "Payment Received (GHS M)", data: labels.map(y => chartMoney(paymentData[y]?.paymentReceived)), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 }
-      ] },
-      options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
-    });
-    charts.outstandingChart = new Chart(document.getElementById("outstandingChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: [
-        { label: "Outstanding Balance (GHS M)", data: labels.map(y => chartMoney(paymentData[y]?.outstandingBalance)), borderColor: "#E74C3C", backgroundColor: "#E74C3C99", tension: 0.25 }
-      ] },
-      options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
-    });
-  }
-
-  function buildPaymentTable(scopeYears = paymentYearsInScope(selectedYear())) {
-    const container = document.getElementById("paymentTableContainer");
-    if(!container) return;
-    if(!scopeYears.length) {
-      container.innerHTML = '<div class="empty-table-note">No 1% payment data available for the selected scope.</div>';
-      return;
-    }
-    let html = '<table><thead><tr><th>Year</th><th>1% Payment Item</th><th>ATC</th></tr></thead><tbody>';
-    scopeYears.forEach(y => {
-      const d = paymentData[String(y)] || {};
-      paymentRows.forEach(item => {
-        html += `<tr><td style="font-weight:900; color:#5DE4C7;">${y}</td><td class="item-name">${item.label}</td><td>${formatByType(d[item.key], item.type)}</td></tr>`;
-      });
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
-  }
-
   function getTableYears() {
     const mode = document.getElementById("tableYearFilter").value;
     if(mode === "all") return yearsList;
-    return yearScope(selectedYear());
+    const y = selectedYear();
+    return y === "all" ? yearsList : [Number(y)];
   }
 
   function buildTable() {
@@ -677,7 +491,7 @@
       container.innerHTML = '<div class="empty-table-note">No financial data available.</div>';
       return;
     }
-    let html = '<table><thead><tr><th>Year</th><th>Financial Item</th><th>ATC</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Year</th><th>Financial Item</th><th>African Towers</th></tr></thead><tbody>';
     years.forEach(y => {
       const d = financialData[String(y)] || {};
       metricRows.forEach(item => {
@@ -689,15 +503,13 @@
   }
 
   function renderAll() {
-    const primary = document.getElementById("yearSelect")?.value || String(latestPopulatedYear() || "all");
+    const y = selectedYear();
     fillYearSelect();
-    renderCompanySelector();
-    document.getElementById("yearSelect").value = primary === "all" || yearsList.includes(Number(primary)) ? primary : String(latestPopulatedYear() || "all");
+    document.getElementById("yearSelect").value = y === "all" || yearsList.includes(Number(y)) ? y : String(latestPopulatedYear() || "all");
     updateStatus();
     updateKpis(selectedYear());
     updateInsights(selectedYear());
     renderCharts(selectedYear());
-    renderPayments(selectedYear());
     buildTable();
   }
 
@@ -735,81 +547,27 @@
     return null;
   }
 
-  function parseFinancialExtractsSheet(workbook) {
-    const sheetName = workbook.SheetNames.find(name => normalizeLabel(name) === "FINANCIAL EXTRACTS") || workbook.SheetNames[0];
-    if(!sheetName) throw new Error("No Financial Extracts worksheet was found.");
-    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: "", raw: true });
-    const yearMarkers = [];
-    rows.forEach((row, idx) => {
-      row.forEach(cell => {
-        const match = String(cell || "").trim().match(/^(20\d{2})$/);
-        if(match) yearMarkers.push({ year: Number(match[1]), rowIndex: idx });
-      });
-    });
-    if(!yearMarkers.length) throw new Error("No year blocks were found in the Financial Extracts sheet.");
-    const parsed = {};
-    yearMarkers.sort((a, b) => a.rowIndex - b.rowIndex).forEach((marker, markerIndex) => {
-      const endRow = markerIndex < yearMarkers.length - 1 ? yearMarkers[markerIndex + 1].rowIndex : rows.length;
-      const yearData = emptyYear();
-      metricRows.forEach(metric => {
-        for(let r = marker.rowIndex + 2; r < endRow; r++) {
-          const row = rows[r] || [];
-          const rowLabel = normalizeLabel(row[1] || row[0]);
-          if(metric.aliases.some(alias => rowLabel === normalizeLabel(alias))) {
-            yearData[metric.key] = parseNumeric(row[2], metric.type);
-            break;
-          }
-        }
-      });
-      if(yearData.netProfitMargin === null && hasValue(yearData.netProfit) && hasValue(yearData.revenue) && Number(yearData.revenue) !== 0) yearData.netProfitMargin = Number(yearData.netProfit) / Number(yearData.revenue);
-      if(yearData.ebitdaMargin === null && hasValue(yearData.ebitda) && hasValue(yearData.revenue) && Number(yearData.revenue) !== 0) yearData.ebitdaMargin = Number(yearData.ebitda) / Number(yearData.revenue);
-      parsed[String(marker.year)] = yearData;
-    });
-    return { years: yearMarkers.map(item => item.year), financial: parsed };
-  }
-
-  function parsePaymentSheet(workbook) {
-    const sheetName = workbook.SheetNames.find(name => normalizeLabel(name) === "1% PAYMENTS") || workbook.SheetNames.find(name => normalizeLabel(name).includes("PAYMENT"));
-    const payments = {};
-    if(!sheetName) return payments;
-    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: "", raw: true });
-    let currentYear = null;
-    rows.forEach(row => {
-      row.forEach(cell => {
-        const match = String(cell || "").trim().match(/^(20\d{2})$/);
-        if(match) currentYear = Number(match[1]);
-      });
-      if(!currentYear) return;
-      const quarter = String(row[1] || "").trim();
-      const invoiced = parseNumeric(row[2], "money");
-      const paymentReceived = parseNumeric(row[3], "money");
-      const outstandingBalance = parseNumeric(row[4], "money");
-      if(!quarter && (invoiced !== null || paymentReceived !== null || outstandingBalance !== null)) {
-        payments[String(currentYear)] = {
-          invoiced,
-          paymentReceived,
-          outstandingBalance,
-          collectionRate: invoiced ? (paymentReceived || 0) / invoiced : null
-        };
-      }
-    });
-    return payments;
-  }
-
   async function parseWorkbook(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = event => {
         try {
           const workbook = XLSX.read(new Uint8Array(event.target.result), { type: "array", raw: true, cellDates: false });
-          const parsedFinancial = parseFinancialExtractsSheet(workbook);
-          const parsedPayments = parsePaymentSheet(workbook);
-          const allYears = normalizeYears([...parsedFinancial.years, ...Object.keys(parsedPayments)]);
-          allYears.forEach(year => {
-            if(!parsedFinancial.financial[String(year)]) parsedFinancial.financial[String(year)] = emptyYear();
-            if(!parsedPayments[String(year)]) parsedPayments[String(year)] = { invoiced: null, paymentReceived: null, outstandingBalance: null, collectionRate: null };
+          const validYears = workbook.SheetNames.filter(name => /^\d{4}$/.test(String(name).trim())).map(Number).sort((a, b) => a - b);
+          if(!validYears.length) throw new Error("No sheets named with a 4-digit year were found.");
+          const parsed = {};
+          validYears.forEach(year => {
+            const sheet = workbook.Sheets[String(year)];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+            const yearData = emptyYear();
+            metricRows.forEach(metric => {
+              yearData[metric.key] = findMetricInRows(rows, metric);
+            });
+            if(yearData.netProfitMargin === null && hasValue(yearData.netProfit) && hasValue(yearData.revenue) && Number(yearData.revenue) !== 0) yearData.netProfitMargin = Number(yearData.netProfit) / Number(yearData.revenue);
+            if(yearData.ebitdaMargin === null && hasValue(yearData.ebitda) && hasValue(yearData.revenue) && Number(yearData.revenue) !== 0) yearData.ebitdaMargin = Number(yearData.ebitda) / Number(yearData.revenue);
+            parsed[String(year)] = yearData;
           });
-          resolve({ version: 1, savedAt: new Date().toISOString(), years: allYears, companies: ["ATC"], financial: parsedFinancial.financial, payments: parsedPayments });
+          resolve({ version: 1, savedAt: new Date().toISOString(), years: validYears, financial: parsed });
         } catch(error) {
           reject(error);
         }
@@ -874,24 +632,12 @@
     oldYears.forEach(year => {
       if(!newYears.includes(year)) changes.push(`${year} exists in the dashboard but was not present in the uploaded workbook.`);
     });
-    newYears.forEach(year => {
-      paymentRows.forEach(item => {
-        const oldVal = comparableValue(oldPayload?.payments?.[String(year)]?.[item.key]);
-        const newVal = comparableValue(newPayload?.payments?.[String(year)]?.[item.key]);
-        if(oldVal === null && newVal === null) return;
-        if(oldVal === null || newVal === null || Math.abs(oldVal - newVal) > 0.000001) {
-          changes.push(`${year} 1% Payment ${item.label}: ${formatByType(oldVal, item.type)} changed to ${formatByType(newVal, item.type)}.`);
-        }
-      });
-    });
     return changes;
   }
 
   function applyPayload(payload) {
     currentPayload = payload;
     financialData = payload.financial || {};
-    paymentData = payload.payments || {};
-    companiesList = payload.companies || COMPANIES;
     yearsList = normalizeYears(payload.years || Object.keys(financialData));
     renderAll();
   }
@@ -926,7 +672,7 @@
   }
 
   function exportCsv() {
-    const rows = [["Year", "Financial Item", "ATC"]];
+    const rows = [["Year", "Financial Item", "African Towers"]];
     getTableYears().forEach(year => {
       const d = financialData[String(year)] || {};
       metricRows.forEach(metric => rows.push([year, metric.label, hasValue(d[metric.key]) ? d[metric.key] : ""]));
@@ -935,22 +681,7 @@
     const blob = new Blob([csv], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "atc_towers_financial_data.csv";
-    link.click();
-    URL.revokeObjectURL(link.href);
-  }
-
-  function exportPaymentCsv() {
-    const rows = [["Year", "1% Payment Item", "ATC"]];
-    paymentYearsInScope(selectedYear()).forEach(year => {
-      const d = paymentData[String(year)] || {};
-      paymentRows.forEach(item => rows.push([year, item.label, hasValue(d[item.key]) ? d[item.key] : ""]));
-    });
-    const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "atc_towers_1_percent_payments.csv";
+    link.download = "african_towers_financial_data.csv";
     link.click();
     URL.revokeObjectURL(link.href);
   }
@@ -967,22 +698,18 @@
     input.click();
   });
   document.getElementById("yearSelect").addEventListener("change", renderAll);
-  document.getElementById("compareYearSelect").addEventListener("change", renderAll);
   document.getElementById("tableYearFilter").addEventListener("change", buildTable);
   document.getElementById("dashboardNotes").addEventListener("input", saveNotes);
   document.getElementById("clearNotesBtn").addEventListener("click", () => {
     document.getElementById("dashboardNotes").value = "";
     saveNotes();
   });
-  document.getElementById("downloadPerformanceBtn").onclick = () => downloadChart("performanceChart", "atc_towers_performance");
-  document.getElementById("downloadMarginBtn").onclick = () => downloadChart("marginChart", "atc_towers_margins");
-  document.getElementById("downloadSpendBtn").onclick = () => downloadChart("spendChart", "atc_towers_spend");
-  document.getElementById("downloadBalanceBtn").onclick = () => downloadChart("balanceChart", "atc_towers_balance_sheet");
-  document.getElementById("downloadEvBtn").onclick = () => downloadChart("enterpriseChart", "atc_towers_enterprise_value");
-  document.getElementById("downloadPaymentBtn").onclick = () => downloadChart("paymentChart", "atc_towers_1_percent_payments");
-  document.getElementById("downloadOutstandingBtn").onclick = () => downloadChart("outstandingChart", "atc_towers_1_percent_outstanding");
+  document.getElementById("downloadPerformanceBtn").onclick = () => downloadChart("performanceChart", "african_towers_performance");
+  document.getElementById("downloadMarginBtn").onclick = () => downloadChart("marginChart", "african_towers_margins");
+  document.getElementById("downloadSpendBtn").onclick = () => downloadChart("spendChart", "african_towers_spend");
+  document.getElementById("downloadBalanceBtn").onclick = () => downloadChart("balanceChart", "african_towers_balance_sheet");
+  document.getElementById("downloadEvBtn").onclick = () => downloadChart("enterpriseChart", "african_towers_enterprise_value");
   document.getElementById("downloadTableBtn").onclick = exportCsv;
-  document.getElementById("downloadPaymentTableBtn").onclick = exportPaymentCsv;
   loadNotes();
   renderAll();
 </script>
