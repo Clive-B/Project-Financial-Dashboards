@@ -19,10 +19,6 @@
     .upload-btn:hover { background: #FFE08C; }
     .year-selector { background: #1A2533; border-radius: 48px; padding: 6px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #3A4A5C; }
     .year-selector label { font-weight: 700; color: #5DE4C7; font-size: 0.82rem; }
-    .company-selector { border-radius: 28px; padding: 8px 14px; gap: 10px; }
-    .company-selector .company-options { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .company-selector .company-options label { color: #E0ECF5; font-size: 0.76rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
-    .company-selector input { accent-color: #5DE4C7; }
     select { background: #2C3E4E; border: 1px solid #5A6F82; border-radius: 32px; padding: 8px 16px; font-weight: 600; color: white; cursor: pointer; }
     .status-badge { background: #00000030; color: #FFD966; padding: 7px 14px; border-radius: 60px; font-size: 0.75rem; border: 1px solid #FFD96630; font-weight: 800; }
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-bottom: 36px; }
@@ -90,14 +86,6 @@
       <div class="year-selector">
         <label><i class="fas fa-calendar-alt"></i> Year:</label>
         <select id="yearSelect"></select>
-      </div>
-      <div class="year-selector">
-        <label><i class="fas fa-code-compare"></i> Compare:</label>
-        <select id="compareYearSelect"></select>
-      </div>
-      <div class="year-selector company-selector">
-        <label><i class="fas fa-building"></i> Companies:</label>
-        <div class="company-options" id="companySelector"></div>
       </div>
       <div class="status-badge" id="dataStatus"><i class="fas fa-database"></i> Embedded data</div>
     </div>
@@ -259,25 +247,16 @@
     return metricRows.some(m => hasValue(d[m.key]));
   }
 
-  function getSelectedCompanies() {
-    const checked = Array.from(document.querySelectorAll(".fiber-company-checkbox:checked")).map(input => input.value).filter(value => companiesList.includes(value));
-    return checked.length ? checked : companiesList;
-  }
-
   function hasAnyData(year) {
-    return getSelectedCompanies().some(company => hasCompanyData(year, company));
+    return companiesList.some(company => hasCompanyData(year, company));
   }
 
-  function aggregateYearValue(year, key, companies = getSelectedCompanies()) {
-    return companies.reduce((sum, company) => sum + (moneyValue(financialData[String(year)]?.[company]?.[key]) || 0), 0);
-  }
-
-  function companyTotalInScope(company, key, years = yearScope(selectedYear())) {
-    return years.reduce((sum, year) => sum + (moneyValue(financialData[String(year)]?.[company]?.[key]) || 0), 0);
+  function aggregateYearValue(year, key) {
+    return companiesList.reduce((sum, company) => sum + (moneyValue(financialData[String(year)]?.[company]?.[key]) || 0), 0);
   }
 
   function populatedCompanies(year) {
-    return getSelectedCompanies().filter(company => hasCompanyData(year, company));
+    return companiesList.filter(company => hasCompanyData(year, company));
   }
 
   function populatedYears() {
@@ -290,16 +269,13 @@
   }
 
   function selectedYear() {
-    return getDashboardYearSelection();
+    return document.getElementById("yearSelect").value || String(latestPopulatedYear() || "all");
   }
 
   function yearScope(yearValue) {
     if(yearValue === "all") return populatedYears();
-    if(String(yearValue).startsWith("compare:")) {
-      return String(yearValue).replace("compare:", "").split(",").map(Number).filter(y => yearsList.includes(y));
-    }
     const y = Number(yearValue);
-    return isNaN(y) ? populatedYears() : [y].filter(item => yearsList.includes(item));
+    return isNaN(y) ? populatedYears() : [y];
   }
 
   function moneyValue(v) {
@@ -348,46 +324,11 @@
     return hasValue(v) ? Number(v) / 1e6 : null;
   }
 
-  function getDashboardYearSelection() {
-    const primary = document.getElementById("yearSelect")?.value || "all";
-    const compare = document.getElementById("compareYearSelect")?.value || "";
-    if(primary !== "all" && compare && compare !== primary) {
-      return "compare:" + [Number(primary), Number(compare)].filter(y => !isNaN(y)).sort((a, b) => a - b).join(",");
-    }
-    return primary;
-  }
-
-  function selectionLabel(yearValue) {
-    const scope = yearScope(yearValue);
-    if(yearValue === "all") return scope.length ? `${Math.min(...scope)}-${Math.max(...scope)}` : "All Years";
-    if(String(yearValue).startsWith("compare:")) return scope.join(" vs ");
-    return String(yearValue);
-  }
-
-  function latestYearInScope(yearValue) {
-    const scope = yearScope(yearValue).filter(hasAnyData);
-    return scope.length ? Math.max(...scope) : latestPopulatedYear();
-  }
-
   function fillYearSelect() {
     const select = document.getElementById("yearSelect");
-    const compareSelect = document.getElementById("compareYearSelect");
     const current = select.value || String(latestPopulatedYear() || "all");
     select.innerHTML = '<option value="all">All Years</option>' + yearsList.map(y => `<option value="${y}">${y}</option>`).join("");
     select.value = yearsList.includes(Number(current)) || current === "all" ? current : String(latestPopulatedYear() || "all");
-    if(compareSelect) {
-      const compareCurrent = compareSelect.value || "";
-      compareSelect.innerHTML = '<option value="">No comparison</option>' + yearsList.map(y => `<option value="${y}">${y}</option>`).join("");
-      compareSelect.value = yearsList.includes(Number(compareCurrent)) ? compareCurrent : "";
-    }
-  }
-
-  function renderCompanySelector() {
-    const container = document.getElementById("companySelector");
-    if(!container) return;
-    const selected = new Set(getSelectedCompanies());
-    container.innerHTML = companiesList.map(company => `<label><input type="checkbox" class="fiber-company-checkbox" value="${company}" ${selected.has(company) ? "checked" : ""}> ${company}</label>`).join("");
-    container.querySelectorAll(".fiber-company-checkbox").forEach(input => input.addEventListener("change", renderAll));
   }
 
   function updateStatus() {
@@ -402,23 +343,20 @@
 
   function updateKpis(yearValue) {
     const scope = yearScope(yearValue);
-    const latest = latestYearInScope(yearValue);
-    const activeCompanies = getSelectedCompanies();
+    const latest = yearValue === "all" ? latestPopulatedYear() : Number(yearValue);
     const latestCompanies = populatedCompanies(latest);
     const totalRevenue = scope.reduce((sum, y) => sum + aggregateYearValue(y, "revenue"), 0);
     const totalProfit = scope.reduce((sum, y) => sum + aggregateYearValue(y, "netProfit"), 0);
     const totalEbitda = scope.reduce((sum, y) => sum + aggregateYearValue(y, "ebitda"), 0);
     const topRevenue = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.revenue) || 0 })).sort((a, b) => b.value - a.value)[0];
     const topEnterprise = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.enterpriseValue) || 0 })).sort((a, b) => b.value - a.value)[0];
-    const isMultiYear = scope.length > 1;
-    const companyLabel = activeCompanies.length === companiesList.length ? "all companies" : activeCompanies.join(", ");
-    const cards = isMultiYear ? [
-      ["Fiber Revenue", formatMoney(totalRevenue), `${selectionLabel(yearValue)} total across ${companyLabel}`],
+    const cards = yearValue === "all" ? [
+      ["Fiber Revenue", formatMoney(totalRevenue), `${scope.length} populated year total across ${companiesList.length} companies`],
       ["Fiber EBITDA", formatMoney(totalEbitda), "Total EBITDA across selected years"],
       ["Fiber Net Profit", formatMoney(totalProfit), "Total net profit across selected years"],
       ["Latest Revenue Leader", topRevenue ? topRevenue.company : "N/A", topRevenue ? formatMoney(topRevenue.value) : `${latest || "N/A"}`],
       ["Latest Enterprise Leader", topEnterprise ? topEnterprise.company : "N/A", topEnterprise ? formatMoney(topEnterprise.value) : `${latest || "N/A"}`],
-      ["Companies Selected", String(activeCompanies.length), companyLabel]
+      ["Companies Tracked", String(companiesList.length), "Spectrum Fibre, C Squared, Comsys, GRIDCo, Main One"]
     ] : [
       ["Fiber Revenue", formatMoney(totalRevenue), `${latest || "N/A"} total across populated companies`],
       ["Fiber EBITDA", formatMoney(totalEbitda), `${latest || "N/A"} operating earnings`],
@@ -433,35 +371,32 @@
   function updateInsights(yearValue) {
     const scopeEl = document.getElementById("insightsScope");
     const content = document.getElementById("insightsContent");
-    const scope = yearScope(yearValue);
-    const latest = latestYearInScope(yearValue);
-    const activeCompanies = getSelectedCompanies();
-    const companyLabel = activeCompanies.length === companiesList.length ? "All companies" : activeCompanies.join(", ");
-    scopeEl.textContent = `${companyLabel} | ${selectionLabel(yearValue)}`;
-    if(!scope.some(hasAnyData)) {
-      content.innerHTML = '<div class="insight-writeup"><p>No populated financial values are available for the selected companies and years. Upload a revised workbook if this scope has been updated.</p></div>';
+    const latest = yearValue === "all" ? latestPopulatedYear() : Number(yearValue);
+    scopeEl.textContent = yearValue === "all" ? `All populated years through ${latest || "N/A"}` : `${latest}`;
+    if(!hasAnyData(latest)) {
+      content.innerHTML = '<div class="insight-writeup"><p>No populated financial values are available for the selected year. Upload a revised workbook if this year has been updated.</p></div>';
       return;
     }
     const latestCompanies = populatedCompanies(latest);
-    const totalRevenue = scope.reduce((sum, y) => sum + aggregateYearValue(y, "revenue"), 0);
-    const totalEbitda = scope.reduce((sum, y) => sum + aggregateYearValue(y, "ebitda"), 0);
-    const totalProfit = scope.reduce((sum, y) => sum + aggregateYearValue(y, "netProfit"), 0);
+    const totalRevenue = aggregateYearValue(latest, "revenue");
+    const totalEbitda = aggregateYearValue(latest, "ebitda");
+    const totalProfit = aggregateYearValue(latest, "netProfit");
     const totalAssets = aggregateYearValue(latest, "totalAssets");
     const totalDebt = aggregateYearValue(latest, "totalDebt");
     const debtToAssets = totalAssets ? totalDebt / totalAssets : null;
-    const revenueLeader = activeCompanies.map(company => ({ company, value: companyTotalInScope(company, "revenue", scope) })).filter(item => item.value !== 0 || scope.some(y => hasCompanyData(y, item.company))).sort((a, b) => b.value - a.value)[0];
-    const profitLeader = activeCompanies.map(company => ({ company, value: companyTotalInScope(company, "netProfit", scope) })).filter(item => item.value !== 0 || scope.some(y => hasCompanyData(y, item.company))).sort((a, b) => b.value - a.value)[0];
-    const selectedScopeYears = yearValue === "all" ? yearsList : scope;
+    const revenueLeader = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.revenue) || 0 })).sort((a, b) => b.value - a.value)[0];
+    const profitLeader = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.netProfit) || 0 })).sort((a, b) => b.value - a.value)[0];
+    const selectedScopeYears = yearValue === "all" ? yearsList : [Number(yearValue)];
     const availableScopeYears = selectedScopeYears.filter(y => hasAnyData(y));
     const missingScopeYears = selectedScopeYears.filter(y => !hasAnyData(y));
     const miniCards = [
-      ["Fiber Revenue", formatMoney(totalRevenue), `${companyLabel} | ${selectionLabel(yearValue)}`],
+      ["Fiber Revenue", formatMoney(totalRevenue), `${latestCompanies.length} populated companies in ${latest}`],
       ["Fiber EBITDA", formatMoney(totalEbitda), "Combined operating earnings"],
       ["Fiber Net Profit", formatMoney(totalProfit), "Combined profit/loss outcome"],
-      ["Debt to Assets", formatPercent(debtToAssets), `${latest || "N/A"} balance sheet leverage`]
+      ["Debt to Assets", formatPercent(debtToAssets), "Combined balance sheet leverage"]
     ];
-    const companySummary = activeCompanies.map(company => `${company}: ${formatMoney(companyTotalInScope(company, "revenue", scope))}`).join("; ");
-    let narrative = `<p><strong>Executive reading:</strong> For ${selectionLabel(yearValue)}, ${companyLabel} recorded combined revenue of <strong>${formatMoney(totalRevenue)}</strong>, EBITDA of <strong>${formatMoney(totalEbitda)}</strong>, and net profit/loss of <strong>${formatMoney(totalProfit)}</strong> across populated records.</p>`;
+    const companySummary = latestCompanies.map(company => `${company}: ${formatMoney(financialData[String(latest)]?.[company]?.revenue)}`).join("; ");
+    let narrative = `<p><strong>Executive reading:</strong> In ${latest}, the fiber operators recorded combined revenue of <strong>${formatMoney(totalRevenue)}</strong>, EBITDA of <strong>${formatMoney(totalEbitda)}</strong>, and net profit/loss of <strong>${formatMoney(totalProfit)}</strong> across populated records.</p>`;
     narrative += `<p><strong>Company comparison:</strong> ${companySummary || "No company-level revenue values are populated for this year."}</p>`;
     if(revenueLeader) narrative += `<p><strong>Revenue leadership:</strong> ${revenueLeader.company} leads the populated operator set with <strong>${formatMoney(revenueLeader.value)}</strong>. ${profitLeader ? `${profitLeader.company} has the strongest net profit position at <strong>${formatMoney(profitLeader.value)}</strong>.` : ""}</p>`;
     narrative += `<p><strong>Balance sheet:</strong> Combined assets are <strong>${formatMoney(totalAssets)}</strong> and combined total debt is <strong>${formatMoney(totalDebt)}</strong>. Debt-to-assets is <strong>${formatPercent(debtToAssets)}</strong>.</p>`;
@@ -470,56 +405,53 @@
   }
 
   function renderCharts(yearValue) {
-    const activeCompanies = getSelectedCompanies();
-    const scopeYears = yearScope(yearValue).filter(y => activeCompanies.some(company => hasCompanyData(y, company)));
-    const isMultiYear = scopeYears.length > 1;
-    const chartYear = scopeYears[0] || latestYearInScope(yearValue);
-    const yearLabels = scopeYears.map(String);
-    const labels = isMultiYear ? yearLabels : activeCompanies;
-    const moneySeries = key => activeCompanies.map(company => ({ label: company, data: yearLabels.map(y => chartMoney(financialData[y]?.[company]?.[key])), borderColor: companyColors[company], backgroundColor: companyColors[company] + "99", tension: 0.25 }));
-    const singleMoney = key => activeCompanies.map(company => chartMoney(financialData[String(chartYear)]?.[company]?.[key]));
-    const singleRatio = key => activeCompanies.map(company => hasValue(financialData[String(chartYear)]?.[company]?.[key]) ? Number(financialData[String(chartYear)]?.[company]?.[key]) * 100 : null);
+    const yearLabels = yearValue === "all" ? populatedYears().map(String) : [String(yearValue)];
+    const isAll = yearValue === "all";
+    const labels = isAll ? yearLabels : companiesList;
+    const moneySeries = key => companiesList.map(company => ({ label: company, data: yearLabels.map(y => chartMoney(financialData[y]?.[company]?.[key])), borderColor: companyColors[company], backgroundColor: companyColors[company] + "99", tension: 0.25 }));
+    const singleMoney = key => companiesList.map(company => chartMoney(financialData[String(yearValue)]?.[company]?.[key]));
+    const singleRatio = key => companiesList.map(company => hasValue(financialData[String(yearValue)]?.[company]?.[key]) ? Number(financialData[String(yearValue)]?.[company]?.[key]) * 100 : null);
     Object.values(charts).forEach(chart => chart.destroy());
     charts = {};
     charts.performance = new Chart(document.getElementById("performanceChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? moneySeries("revenue").map(ds => ({ ...ds, label: `${ds.label} Revenue` })) : [
-        { label: "Revenue (GHS M)", data: singleMoney("revenue"), backgroundColor: activeCompanies.map(company => companyColors[company]) },
-        { label: "EBITDA (GHS M)", data: singleMoney("ebitda"), backgroundColor: activeCompanies.map(company => companyColors[company] + "CC") },
-        { label: "Net Profit (GHS M)", data: singleMoney("netProfit"), backgroundColor: activeCompanies.map(company => companyColors[company] + "99") }
+      type: isAll ? "line" : "bar",
+      data: { labels, datasets: isAll ? moneySeries("revenue").map(ds => ({ ...ds, label: `${ds.label} Revenue` })) : [
+        { label: "Revenue (GHS M)", data: singleMoney("revenue"), backgroundColor: companiesList.map(company => companyColors[company]) },
+        { label: "EBITDA (GHS M)", data: singleMoney("ebitda"), backgroundColor: companiesList.map(company => companyColors[company] + "CC") },
+        { label: "Net Profit (GHS M)", data: singleMoney("netProfit"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.margin = new Chart(document.getElementById("marginChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? activeCompanies.map(company => ({ label: `${company} Net Profit Margin`, data: yearLabels.map(y => hasValue(financialData[y]?.[company]?.netProfitMargin) ? Number(financialData[y]?.[company]?.netProfitMargin) * 100 : null), borderColor: companyColors[company], backgroundColor: "transparent", tension: 0.25 })) : [
-        { label: "EBITDA Margin", data: singleRatio("ebitdaMargin"), backgroundColor: activeCompanies.map(company => companyColors[company]) },
-        { label: "Net Profit Margin", data: singleRatio("netProfitMargin"), backgroundColor: activeCompanies.map(company => companyColors[company] + "99") }
+      type: isAll ? "line" : "bar",
+      data: { labels, datasets: isAll ? companiesList.map(company => ({ label: `${company} Net Profit Margin`, data: yearLabels.map(y => hasValue(financialData[y]?.[company]?.netProfitMargin) ? Number(financialData[y]?.[company]?.netProfitMargin) * 100 : null), borderColor: companyColors[company], backgroundColor: "transparent", tension: 0.25 })) : [
+        { label: "EBITDA Margin", data: singleRatio("ebitdaMargin"), backgroundColor: companiesList.map(company => companyColors[company]) },
+        { label: "Net Profit Margin", data: singleRatio("netProfitMargin"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "Percent", color: "#FFD966" } } } }
     });
     charts.spend = new Chart(document.getElementById("spendChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? moneySeries("expenditure").map(ds => ({ ...ds, label: `${ds.label} Expenditure` })) : [
-        { label: "Expenditure (GHS M)", data: singleMoney("expenditure"), backgroundColor: activeCompanies.map(company => companyColors[company]) },
-        { label: "Cost of Sales (GHS M)", data: singleMoney("costOfSales"), backgroundColor: activeCompanies.map(company => companyColors[company] + "CC") },
-        { label: "CAPEX (GHS M)", data: singleMoney("capex"), backgroundColor: activeCompanies.map(company => companyColors[company] + "99") }
+      type: isAll ? "line" : "bar",
+      data: { labels, datasets: isAll ? moneySeries("expenditure").map(ds => ({ ...ds, label: `${ds.label} Expenditure` })) : [
+        { label: "Expenditure (GHS M)", data: singleMoney("expenditure"), backgroundColor: companiesList.map(company => companyColors[company]) },
+        { label: "Cost of Sales (GHS M)", data: singleMoney("costOfSales"), backgroundColor: companiesList.map(company => companyColors[company] + "CC") },
+        { label: "CAPEX (GHS M)", data: singleMoney("capex"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.balance = new Chart(document.getElementById("balanceChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? moneySeries("totalAssets").map(ds => ({ ...ds, label: `${ds.label} Total Assets` })) : [
-        { label: "Total Assets (GHS M)", data: singleMoney("totalAssets"), backgroundColor: activeCompanies.map(company => companyColors[company]) },
-        { label: "Total Liabilities (GHS M)", data: singleMoney("totalLiabilities"), backgroundColor: activeCompanies.map(company => companyColors[company] + "CC") },
-        { label: "Total Debt (GHS M)", data: singleMoney("totalDebt"), backgroundColor: activeCompanies.map(company => companyColors[company] + "99") }
+      type: isAll ? "line" : "bar",
+      data: { labels, datasets: isAll ? moneySeries("totalAssets").map(ds => ({ ...ds, label: `${ds.label} Total Assets` })) : [
+        { label: "Total Assets (GHS M)", data: singleMoney("totalAssets"), backgroundColor: companiesList.map(company => companyColors[company]) },
+        { label: "Total Liabilities (GHS M)", data: singleMoney("totalLiabilities"), backgroundColor: companiesList.map(company => companyColors[company] + "CC") },
+        { label: "Total Debt (GHS M)", data: singleMoney("totalDebt"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.enterprise = new Chart(document.getElementById("enterpriseChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? moneySeries("enterpriseValue").map(ds => ({ ...ds, label: `${ds.label} Enterprise Value`, fill: false })) : [
-        { label: "Enterprise Value (GHS M)", data: singleMoney("enterpriseValue"), backgroundColor: activeCompanies.map(company => companyColors[company]) }
+      type: isAll ? "line" : "bar",
+      data: { labels, datasets: isAll ? moneySeries("enterpriseValue").map(ds => ({ ...ds, label: `${ds.label} Enterprise Value`, fill: false })) : [
+        { label: "Enterprise Value (GHS M)", data: singleMoney("enterpriseValue"), backgroundColor: companiesList.map(company => companyColors[company]) }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
@@ -528,7 +460,8 @@
   function getTableYears() {
     const mode = document.getElementById("tableYearFilter").value;
     if(mode === "all") return yearsList;
-    return yearScope(selectedYear());
+    const y = selectedYear();
+    return y === "all" ? yearsList : [Number(y)];
   }
 
   function buildTable() {
@@ -538,11 +471,10 @@
       container.innerHTML = '<div class="empty-table-note">No financial data available.</div>';
       return;
     }
-    const activeCompanies = getSelectedCompanies();
-    let html = `<table><thead><tr><th>Year</th><th>Financial Item</th>${activeCompanies.map(company => `<th style="color:${companyColors[company] || "#5DE4C7"};">${company}</th>`).join("")}</tr></thead><tbody>`;
+    let html = `<table><thead><tr><th>Year</th><th>Financial Item</th>${companiesList.map(company => `<th style="color:${companyColors[company] || "#5DE4C7"};">${company}</th>`).join("")}</tr></thead><tbody>`;
     years.forEach(y => {
       metricRows.forEach(item => {
-        const values = activeCompanies.map(company => `<td>${formatByType(financialData[String(y)]?.[company]?.[item.key], item.type)}</td>`).join("");
+        const values = companiesList.map(company => `<td>${formatByType(financialData[String(y)]?.[company]?.[item.key], item.type)}</td>`).join("");
         html += `<tr><td style="font-weight:900; color:#5DE4C7;">${y}</td><td class="item-name">${item.label}</td>${values}</tr>`;
       });
     });
@@ -551,10 +483,9 @@
   }
 
   function renderAll() {
-    const primary = document.getElementById("yearSelect")?.value || String(latestPopulatedYear() || "all");
+    const y = selectedYear();
     fillYearSelect();
-    renderCompanySelector();
-    document.getElementById("yearSelect").value = primary === "all" || yearsList.includes(Number(primary)) ? primary : String(latestPopulatedYear() || "all");
+    document.getElementById("yearSelect").value = y === "all" || yearsList.includes(Number(y)) ? y : String(latestPopulatedYear() || "all");
     updateStatus();
     updateKpis(selectedYear());
     updateInsights(selectedYear());
@@ -761,10 +692,9 @@
   }
 
   function exportCsv() {
-    const activeCompanies = getSelectedCompanies();
-    const rows = [["Year", "Financial Item", ...activeCompanies]];
+    const rows = [["Year", "Financial Item", ...companiesList]];
     getTableYears().forEach(year => {
-      metricRows.forEach(metric => rows.push([year, metric.label, ...activeCompanies.map(company => {
+      metricRows.forEach(metric => rows.push([year, metric.label, ...companiesList.map(company => {
         const value = financialData[String(year)]?.[company]?.[metric.key];
         return hasValue(value) ? value : "";
       })]));
@@ -790,7 +720,6 @@
     input.click();
   });
   document.getElementById("yearSelect").addEventListener("change", renderAll);
-  document.getElementById("compareYearSelect").addEventListener("change", renderAll);
   document.getElementById("tableYearFilter").addEventListener("change", buildTable);
   document.getElementById("dashboardNotes").addEventListener("input", saveNotes);
   document.getElementById("clearNotesBtn").addEventListener("click", () => {
