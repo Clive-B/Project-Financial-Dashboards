@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Fiber Financial Dashboard</title>
+  <title>Terrestrial Fibre Financial Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -78,8 +78,8 @@
 <div class="dashboard-container">
   <div class="header">
     <div class="title-section">
-      <h1><i class="fas fa-network-wired" style="color:#FFD966;"></i> Fiber Financial Dashboard</h1>
-      <p>Upload fiber financial extracts from the FINANCIAL EXTRACTS workbook. Updated figures are compared, applied, and remembered in this browser.</p>
+      <h1><i class="fas fa-network-wired" style="color:#FFD966;"></i> Terrestrial Fibre Financial Dashboard</h1>
+      <p>Upload Spectrum Fibre financial extracts with sheets named by year. Updated figures are compared, applied, and remembered in this browser.</p>
     </div>
     <div class="controls">
       <button class="upload-btn" id="uploadWorkbookBtn"><i class="fas fa-file-excel"></i> Upload Financial Extract</button>
@@ -189,11 +189,9 @@
 </div>
 
 <script>
-  const CACHE_KEY = "fiberFinancialDashboardSnapshot_v2";
-  const NOTES_KEY = "fiberFinancialDashboardNotes_v1";
-  const COMPANY_NAME = "Fiber Operators";
-  const COMPANIES = ["Spectrum Fibre", "C Squared", "Comsys", "GRIDCo", "Main One"];
-  const companyColors = { "Spectrum Fibre": "#FFD966", "C Squared": "#5DE4C7", "Comsys": "#3498DB", "GRIDCo": "#E74C3C", "Main One": "#9B59B6" };
+  const CACHE_KEY = "spectrumFibreFinancialDashboardSnapshot_v1";
+  const NOTES_KEY = "spectrumFibreFinancialDashboardNotes_v1";
+  const COMPANY_NAME = "Spectrum Fibre";
   const metricRows = [
     { key: "revenue", label: "Revenue", type: "money", aliases: ["REVENUE"] },
     { key: "expenditure", label: "Expenditure", type: "money", aliases: ["EXPENDITURE"] },
@@ -217,11 +215,35 @@
     { key: "enterpriseValue", label: "Total Enterprise Value", type: "money", aliases: ["TOTAL ENTERPRISE VALUE", "ENTERPRISE VALUE"] }
   ];
 
-  const DEFAULT_PAYLOAD = {"version":1,"savedAt":"embedded-from-fibre-financial-extracts","years":[2021,2022,2023,2024,2025],"companies":["Spectrum Fibre","C Squared","Comsys","GRIDCo","Main One"],"financial":{"2021":{"Spectrum Fibre":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"C Squared":{"revenue":34005700,"expenditure":16243906,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":-26978107,"capex":null,"netProfitMargin":-0.7933407340534087,"netProfitBeforeTax":-21929460,"currentAssets":38418512,"nonCurrentAssets":112023534,"totalAssets":150442046,"currentLiabilities":15331949,"nonCurrentLiabilities":262417644,"totalLiabilities":277749593,"cash":17135675,"totalEquity":-127307547,"totalDebt":null,"enterpriseValue":-144443222},"Comsys":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"GRIDCo":{"revenue":1278768,"expenditure":null,"costOfSales":387412,"grossProfit":891356,"ebitda":null,"ebitdaMargin":null,"netProfit":197521,"capex":null,"netProfitMargin":0.1544619508777198,"netProfitBeforeTax":1296,"currentAssets":1718251,"nonCurrentAssets":5504215,"totalAssets":7222466,"currentLiabilities":2452653,"nonCurrentLiabilities":1991752,"totalLiabilities":4444405,"cash":494300,"totalEquity":2778061,"totalDebt":1690020,"enterpriseValue":3973781},"Main One":{"revenue":33264249,"expenditure":null,"costOfSales":19620421,"grossProfit":13643828,"ebitda":null,"ebitdaMargin":null,"netProfit":-3499171,"capex":null,"netProfitMargin":-0.10519314595077736,"netProfitBeforeTax":-1765201,"currentAssets":16731275,"nonCurrentAssets":53393105,"totalAssets":70124380,"currentLiabilities":18683104,"nonCurrentLiabilities":37919980,"totalLiabilities":56603084,"cash":3931536,"totalEquity":13521296,"totalDebt":20200013,"enterpriseValue":29789773}},"2022":{"Spectrum Fibre":{"revenue":13011000,"expenditure":68814000,"costOfSales":8867000,"grossProfit":4144000,"ebitda":-64669000,"ebitdaMargin":-4.970332795327031,"netProfit":-107646000,"capex":null,"netProfitMargin":-8.273460917685036,"netProfitBeforeTax":null,"currentAssets":9204000,"nonCurrentAssets":522547000,"totalAssets":531750000,"currentLiabilities":79957000,"nonCurrentLiabilities":305707000,"totalLiabilities":385665000,"cash":1929000,"totalEquity":146086000,"totalDebt":54893000,"enterpriseValue":199050000},"C Squared":{"revenue":47584630,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":-101255516,"capex":null,"netProfitMargin":-2.1279038210447365,"netProfitBeforeTax":null,"currentAssets":34961000,"nonCurrentAssets":109762149,"totalAssets":144723149,"currentLiabilities":28308512,"nonCurrentLiabilities":344977700,"totalLiabilities":373286212,"cash":2823802,"totalEquity":-228563063,"totalDebt":null,"enterpriseValue":-231386865},"Comsys":{"revenue":71274753,"expenditure":20071363,"costOfSales":41131608,"grossProfit":30143144,"ebitda":null,"ebitdaMargin":null,"netProfit":5370565,"capex":null,"netProfitMargin":0.07535017343378236,"netProfitBeforeTax":9158320,"currentAssets":94252132,"nonCurrentAssets":37257293,"totalAssets":131509425,"currentLiabilities":34563048,"nonCurrentLiabilities":null,"totalLiabilities":34563048,"cash":6856450,"totalEquity":96946376,"totalDebt":null,"enterpriseValue":90089926},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":36775713,"expenditure":null,"costOfSales":26475714,"grossProfit":10299999,"ebitda":null,"ebitdaMargin":null,"netProfit":-23558652,"capex":null,"netProfitMargin":-0.6406035417994479,"netProfitBeforeTax":null,"currentAssets":35545578,"nonCurrentAssets":46527300,"totalAssets":82072878,"currentLiabilities":45748636,"nonCurrentLiabilities":46361598,"totalLiabilities":92110234,"cash":19359195,"totalEquity":-10037356,"totalDebt":36816229,"enterpriseValue":7419678}},"2023":{"Spectrum Fibre":{"revenue":14206000,"expenditure":50919000,"costOfSales":13308000,"grossProfit":898000,"ebitda":-50021000,"ebitdaMargin":-0.035211178375334364,"netProfit":-120011000,"capex":2003000,"netProfitMargin":-0.0844790933408419,"netProfitBeforeTax":-120011000,"currentAssets":19576000,"nonCurrentAssets":493974000,"totalAssets":513550000,"currentLiabilities":62768000,"nonCurrentLiabilities":424733000,"totalLiabilities":487501000,"cash":3129000,"totalEquity":26049000,"totalDebt":382703000,"enterpriseValue":405623000},"C Squared":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Comsys":{"revenue":76051384,"expenditure":27077607,"costOfSales":43109115,"grossProfit":32942269,"ebitda":7324558,"ebitdaMargin":0.09631064702254465,"netProfit":2022237,"capex":null,"netProfitMargin":0.026590403667078565,"netProfitBeforeTax":4424072,"currentAssets":82280460,"nonCurrentAssets":40369046,"totalAssets":122649506,"currentLiabilities":28073782,"nonCurrentLiabilities":null,"totalLiabilities":28073782,"cash":4791840,"totalEquity":94575724,"totalDebt":2525384,"enterpriseValue":92309268},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":43561494,"expenditure":18654822,"costOfSales":22294153,"grossProfit":21267341,"ebitda":2751297,"ebitdaMargin":0.06315892195983912,"netProfit":-2024419,"capex":2000954,"netProfitMargin":-0.04647267148367317,"netProfitBeforeTax":-2024419,"currentAssets":22739297,"nonCurrentAssets":47030325,"totalAssets":69769622,"currentLiabilities":23688297,"nonCurrentLiabilities":8429588,"totalLiabilities":32117885,"cash":6884646,"totalEquity":37651737,"totalDebt":null,"enterpriseValue":30767091}},"2024":{"Spectrum Fibre":{"revenue":259141000,"expenditure":202942000,"costOfSales":72369000,"grossProfit":186772000,"ebitda":-16170000,"ebitdaMargin":-0.062398462613017625,"netProfit":-161227000,"capex":106367000,"netProfitMargin":-0.6221593649789111,"netProfitBeforeTax":-90218000,"currentAssets":385409000,"nonCurrentAssets":1147700000,"totalAssets":1533109000,"currentLiabilities":303052000,"nonCurrentLiabilities":1284018000,"totalLiabilities":1587070000,"cash":159952000,"totalEquity":-53961000,"totalDebt":1149671000,"enterpriseValue":935758000},"C Squared":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Comsys":{"revenue":112425731,"expenditure":35509599,"costOfSales":64448340,"grossProfit":47977391,"ebitda":13180679,"ebitdaMargin":0.11723898864397866,"netProfit":5426329,"capex":null,"netProfitMargin":0.04826589920060204,"netProfitBeforeTax":9586681,"currentAssets":120497512,"nonCurrentAssets":45311665,"totalAssets":165809177,"currentLiabilities":71207124,"nonCurrentLiabilities":null,"totalLiabilities":71207124,"cash":27416208,"totalEquity":94602053,"totalDebt":3119426,"enterpriseValue":70305271},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":56310197,"expenditure":33307086,"costOfSales":36331571,"grossProfit":19978626,"ebitda":-7987875,"ebitdaMargin":-0.14185485801088565,"netProfit":-10767635,"capex":2552421,"netProfitMargin":-0.1912199845438296,"netProfitBeforeTax":-10767635,"currentAssets":77314193,"nonCurrentAssets":42636243,"totalAssets":119950436,"currentLiabilities":79707975,"nonCurrentLiabilities":13358358,"totalLiabilities":93066333,"cash":17025092,"totalEquity":26884103,"totalDebt":50931531,"enterpriseValue":60790542}},"2025":{"Spectrum Fibre":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"C Squared":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Comsys":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null}}}};
+  const DEFAULT_PAYLOAD = {
+    version: 1,
+    savedAt: "embedded-from-spectrum-fibre-financial-extracts",
+    years: [2021, 2022, 2023, 2024, 2025],
+    financial: {
+      "2021": emptyYear(),
+      "2022": emptyYear(),
+      "2023": {
+        revenue: 14206000, expenditure: 50919000, costOfSales: 13308000, grossProfit: 898000,
+        ebitda: -50021000, ebitdaMargin: -3.5211, netProfit: -120011000, capex: 2003000,
+        netProfitMargin: -8.4479, netProfitBeforeTax: -120011000, currentAssets: 19576000,
+        nonCurrentAssets: 493974000, totalAssets: 513550000, currentLiabilities: 62768000,
+        nonCurrentLiabilities: 424733000, totalLiabilities: 487501000, cash: 3129000,
+        totalEquity: 26049000, totalDebt: 382703000, enterpriseValue: 405623000
+      },
+      "2024": {
+        revenue: 259141000, expenditure: 202942000, costOfSales: 72369000, grossProfit: 186772000,
+        ebitda: -16170000, ebitdaMargin: -0.0624, netProfit: -161227000, capex: 106367000,
+        netProfitMargin: -0.6222, netProfitBeforeTax: -90218000, currentAssets: 385409000,
+        nonCurrentAssets: 1147700000, totalAssets: 1533109000, currentLiabilities: 303052000,
+        nonCurrentLiabilities: 1284018000, totalLiabilities: 1587070000, cash: 159952000,
+        totalEquity: -53961000, totalDebt: 1149671000, enterpriseValue: 935758000
+      },
+      "2025": emptyYear()
+    }
+  };
 
   let currentPayload = loadPayload() || DEFAULT_PAYLOAD;
   let financialData = currentPayload.financial || {};
-  let companiesList = currentPayload.companies || COMPANIES;
   let yearsList = normalizeYears(currentPayload.years || Object.keys(financialData));
   let charts = {};
 
@@ -242,21 +264,9 @@
     return v !== null && v !== undefined && v !== "" && !isNaN(Number(v));
   }
 
-  function hasCompanyData(year, company) {
-    const d = financialData[String(year)]?.[company] || {};
-    return metricRows.some(m => hasValue(d[m.key]));
-  }
-
   function hasAnyData(year) {
-    return companiesList.some(company => hasCompanyData(year, company));
-  }
-
-  function aggregateYearValue(year, key) {
-    return companiesList.reduce((sum, company) => sum + (moneyValue(financialData[String(year)]?.[company]?.[key]) || 0), 0);
-  }
-
-  function populatedCompanies(year) {
-    return companiesList.filter(company => hasCompanyData(year, company));
+    const d = financialData[String(year)] || {};
+    return metricRows.some(m => hasValue(d[m.key]));
   }
 
   function populatedYears() {
@@ -344,26 +354,28 @@
   function updateKpis(yearValue) {
     const scope = yearScope(yearValue);
     const latest = yearValue === "all" ? latestPopulatedYear() : Number(yearValue);
-    const latestCompanies = populatedCompanies(latest);
-    const totalRevenue = scope.reduce((sum, y) => sum + aggregateYearValue(y, "revenue"), 0);
-    const totalProfit = scope.reduce((sum, y) => sum + aggregateYearValue(y, "netProfit"), 0);
-    const totalEbitda = scope.reduce((sum, y) => sum + aggregateYearValue(y, "ebitda"), 0);
-    const topRevenue = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.revenue) || 0 })).sort((a, b) => b.value - a.value)[0];
-    const topEnterprise = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.enterpriseValue) || 0 })).sort((a, b) => b.value - a.value)[0];
+    const d = financialData[String(latest)] || {};
+    const prevYear = previousPopulatedYear(latest);
+    const prev = prevYear ? financialData[String(prevYear)] || {} : {};
+    const revenueGrowth = pctChange(d.revenue, prev.revenue);
+    const profitGrowth = pctChange(d.netProfit, prev.netProfit);
+    const totalRevenue = scope.reduce((sum, y) => sum + (moneyValue(financialData[String(y)]?.revenue) || 0), 0);
+    const totalProfit = scope.reduce((sum, y) => sum + (moneyValue(financialData[String(y)]?.netProfit) || 0), 0);
+    const totalEbitda = scope.reduce((sum, y) => sum + (moneyValue(financialData[String(y)]?.ebitda) || 0), 0);
     const cards = yearValue === "all" ? [
-      ["Fiber Revenue", formatMoney(totalRevenue), `${scope.length} populated year total across ${companiesList.length} companies`],
-      ["Fiber EBITDA", formatMoney(totalEbitda), "Total EBITDA across selected years"],
-      ["Fiber Net Profit", formatMoney(totalProfit), "Total net profit across selected years"],
-      ["Latest Revenue Leader", topRevenue ? topRevenue.company : "N/A", topRevenue ? formatMoney(topRevenue.value) : `${latest || "N/A"}`],
-      ["Latest Enterprise Leader", topEnterprise ? topEnterprise.company : "N/A", topEnterprise ? formatMoney(topEnterprise.value) : `${latest || "N/A"}`],
-      ["Companies Tracked", String(companiesList.length), "Spectrum Fibre, C Squared, Comsys, GRIDCo, Main One"]
+      ["Revenue", formatMoney(totalRevenue), `${scope.length} populated year total`],
+      ["EBITDA", formatMoney(totalEbitda), "Total EBITDA across selected years"],
+      ["Net Profit", formatMoney(totalProfit), "Total net profit across selected years"],
+      ["Latest Enterprise Value", formatMoney(d.enterpriseValue), `${latest || "N/A"} balance sheet signal`],
+      ["Latest EBITDA Margin", formatPercent(d.ebitdaMargin), `${latest || "N/A"} operating margin`],
+      ["Latest Net Profit Margin", formatPercent(d.netProfitMargin), `${latest || "N/A"} profit conversion`]
     ] : [
-      ["Fiber Revenue", formatMoney(totalRevenue), `${latest || "N/A"} total across populated companies`],
-      ["Fiber EBITDA", formatMoney(totalEbitda), `${latest || "N/A"} operating earnings`],
-      ["Fiber Net Profit", formatMoney(totalProfit), `${latest || "N/A"} profit/loss total`],
-      ["Revenue Leader", topRevenue ? topRevenue.company : "N/A", topRevenue ? formatMoney(topRevenue.value) : "No populated data"],
-      ["Enterprise Leader", topEnterprise ? topEnterprise.company : "N/A", topEnterprise ? formatMoney(topEnterprise.value) : "No populated data"],
-      ["Populated Companies", String(latestCompanies.length), `${latest || "N/A"} records with values`]
+      ["Revenue", formatMoney(d.revenue), revenueGrowth === null ? "No prior populated year for growth" : `${revenueGrowth.toFixed(1)}% vs ${prevYear}`],
+      ["EBITDA", formatMoney(d.ebitda), `Margin: ${formatPercent(d.ebitdaMargin)}`],
+      ["Net Profit", formatMoney(d.netProfit), profitGrowth === null ? "No prior populated year for growth" : `${profitGrowth.toFixed(1)}% vs ${prevYear}`],
+      ["Total Assets", formatMoney(d.totalAssets), `Liabilities: ${formatMoney(d.totalLiabilities)}`],
+      ["Total Debt", formatMoney(d.totalDebt), `Cash: ${formatMoney(d.cash)}`],
+      ["Enterprise Value", formatMoney(d.enterpriseValue), `Equity: ${formatMoney(d.totalEquity)}`]
     ];
     document.getElementById("kpiContainer").innerHTML = cards.map(card => `<div class="kpi-card"><div class="kpi-title">${card[0]}</div><div class="kpi-value">${card[1]}</div><div class="kpi-sub">${card[2]}</div></div>`).join("");
   }
@@ -372,86 +384,87 @@
     const scopeEl = document.getElementById("insightsScope");
     const content = document.getElementById("insightsContent");
     const latest = yearValue === "all" ? latestPopulatedYear() : Number(yearValue);
+    const d = financialData[String(latest)] || {};
+    const prevYear = previousPopulatedYear(latest);
+    const prev = prevYear ? financialData[String(prevYear)] || {} : {};
+    const revenueGrowth = pctChange(d.revenue, prev.revenue);
+    const profitGrowth = pctChange(d.netProfit, prev.netProfit);
     scopeEl.textContent = yearValue === "all" ? `All populated years through ${latest || "N/A"}` : `${latest}`;
     if(!hasAnyData(latest)) {
       content.innerHTML = '<div class="insight-writeup"><p>No populated financial values are available for the selected year. Upload a revised workbook if this year has been updated.</p></div>';
       return;
     }
-    const latestCompanies = populatedCompanies(latest);
-    const totalRevenue = aggregateYearValue(latest, "revenue");
-    const totalEbitda = aggregateYearValue(latest, "ebitda");
-    const totalProfit = aggregateYearValue(latest, "netProfit");
-    const totalAssets = aggregateYearValue(latest, "totalAssets");
-    const totalDebt = aggregateYearValue(latest, "totalDebt");
-    const debtToAssets = totalAssets ? totalDebt / totalAssets : null;
-    const revenueLeader = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.revenue) || 0 })).sort((a, b) => b.value - a.value)[0];
-    const profitLeader = latestCompanies.map(company => ({ company, value: moneyValue(financialData[String(latest)]?.[company]?.netProfit) || 0 })).sort((a, b) => b.value - a.value)[0];
+    const debtToAssets = hasValue(d.totalDebt) && hasValue(d.totalAssets) && Number(d.totalAssets) !== 0 ? Number(d.totalDebt) / Number(d.totalAssets) : null;
+    const liabilityToAssets = hasValue(d.totalLiabilities) && hasValue(d.totalAssets) && Number(d.totalAssets) !== 0 ? Number(d.totalLiabilities) / Number(d.totalAssets) : null;
+    const expenseToRevenue = hasValue(d.expenditure) && hasValue(d.revenue) && Number(d.revenue) !== 0 ? Number(d.expenditure) / Number(d.revenue) : null;
+    const profitLabel = Number(d.netProfit) < 0 ? "Net Loss" : "Net Profit";
+    const profitNarrative = Number(d.netProfit) < 0 ? `net loss of <strong>${formatMoney(Math.abs(Number(d.netProfit)))}</strong>` : `net profit of <strong>${formatMoney(d.netProfit)}</strong>`;
+    const marginNarrative = Number(d.netProfitMargin) < 0 ? `net loss margin is <strong>${formatPercent(Math.abs(Number(d.netProfitMargin)))}</strong>` : `net profit margin is <strong>${formatPercent(d.netProfitMargin)}</strong>`;
+    const expenseInterpretation = expenseToRevenue === null ? "Operating expense-to-revenue analysis is unavailable for this year." : (expenseToRevenue >= 1 ? "Operating expenses are broadly equal to or above revenue, indicating significant cost pressure." : (expenseToRevenue >= 0.8 ? "Operating expenses remain high relative to revenue, even though they are below revenue." : "Operating expenses are comparatively contained relative to revenue."));
     const selectedScopeYears = yearValue === "all" ? yearsList : [Number(yearValue)];
     const availableScopeYears = selectedScopeYears.filter(y => hasAnyData(y));
     const missingScopeYears = selectedScopeYears.filter(y => !hasAnyData(y));
     const miniCards = [
-      ["Fiber Revenue", formatMoney(totalRevenue), `${latestCompanies.length} populated companies in ${latest}`],
-      ["Fiber EBITDA", formatMoney(totalEbitda), "Combined operating earnings"],
-      ["Fiber Net Profit", formatMoney(totalProfit), "Combined profit/loss outcome"],
-      ["Debt to Assets", formatPercent(debtToAssets), "Combined balance sheet leverage"]
+      ["Revenue Scale", formatMoney(d.revenue), revenueGrowth === null ? "Growth comparison unavailable" : `${revenueGrowth.toFixed(1)}% movement vs ${prevYear}`],
+      [profitLabel, Number(d.netProfit) < 0 ? formatMoney(Math.abs(Number(d.netProfit))) : formatMoney(d.netProfit), profitGrowth === null ? "Profit movement unavailable" : `${profitGrowth.toFixed(1)}% movement vs ${prevYear}`],
+      ["EBITDA Margin", formatPercent(d.ebitdaMargin), "Operating earnings as a share of revenue"],
+      ["Debt to Assets", formatPercent(debtToAssets), "Debt load compared with asset base"]
     ];
-    const companySummary = latestCompanies.map(company => `${company}: ${formatMoney(financialData[String(latest)]?.[company]?.revenue)}`).join("; ");
-    let narrative = `<p><strong>Executive reading:</strong> In ${latest}, the fiber operators recorded combined revenue of <strong>${formatMoney(totalRevenue)}</strong>, EBITDA of <strong>${formatMoney(totalEbitda)}</strong>, and net profit/loss of <strong>${formatMoney(totalProfit)}</strong> across populated records.</p>`;
-    narrative += `<p><strong>Company comparison:</strong> ${companySummary || "No company-level revenue values are populated for this year."}</p>`;
-    if(revenueLeader) narrative += `<p><strong>Revenue leadership:</strong> ${revenueLeader.company} leads the populated operator set with <strong>${formatMoney(revenueLeader.value)}</strong>. ${profitLeader ? `${profitLeader.company} has the strongest net profit position at <strong>${formatMoney(profitLeader.value)}</strong>.` : ""}</p>`;
-    narrative += `<p><strong>Balance sheet:</strong> Combined assets are <strong>${formatMoney(totalAssets)}</strong> and combined total debt is <strong>${formatMoney(totalDebt)}</strong>. Debt-to-assets is <strong>${formatPercent(debtToAssets)}</strong>.</p>`;
-    const limitationsHtml = `<div class="data-limitations-note"><strong>Data limitations:</strong> This dashboard uses populated records from the FINANCIAL EXTRACTS workbook. ${missingScopeYears.length ? `The selected scope includes blank or unavailable year(s): ${missingScopeYears.join(", ")}.` : `The selected scope has ${availableScopeYears.length} populated year(s).`} Some operators have blank records in some years, so read comparisons together with workbook coverage.</div>`;
+    let narrative = `<p><strong>Executive reading:</strong> In ${latest}, ${COMPANY_NAME} recorded revenue of <strong>${formatMoney(d.revenue)}</strong>, EBITDA of <strong>${formatMoney(d.ebitda)}</strong>, and ${profitNarrative}.</p>`;
+    narrative += `<p><strong>Profitability:</strong> EBITDA margin stands at <strong>${formatPercent(d.ebitdaMargin)}</strong>, while ${marginNarrative}. This separates operating strength from the final profit outcome after below-EBITDA movements.</p>`;
+    if(expenseToRevenue !== null) narrative += `<p><strong>Operating efficiency:</strong> Operating expenses represent about <strong>${(expenseToRevenue * 100).toFixed(1)}%</strong> of revenue in ${latest}. ${expenseInterpretation}</p>`;
+    narrative += `<p><strong>Balance sheet:</strong> Total assets are <strong>${formatMoney(d.totalAssets)}</strong>, liabilities are <strong>${formatMoney(d.totalLiabilities)}</strong>, and total debt is <strong>${formatMoney(d.totalDebt)}</strong>. Liability-to-assets is <strong>${formatPercent(liabilityToAssets)}</strong>.</p>`;
+    narrative += `<p><strong>Enterprise value:</strong> The enterprise value shown for ${latest} is <strong>${formatMoney(d.enterpriseValue)}</strong>. Use this together with revenue, EBITDA, and debt to judge whether valuation movement is being supported by operating performance.</p>`;
+    const limitationsHtml = `<div class="data-limitations-note"><strong>Data limitations:</strong> This dashboard uses the available populated records in the workbook. ${missingScopeYears.length ? `The selected scope includes blank or unavailable year(s): ${missingScopeYears.join(", ")}.` : `The selected scope has ${availableScopeYears.length} populated year(s).`} Read trends, ratios, and rankings together with the source workbook and available-year coverage.</div>`;
     content.innerHTML = `<div class="insights-grid">${miniCards.map(card => `<div class="insight-mini-card"><div class="insight-mini-title">${card[0]}</div><div class="insight-mini-value">${card[1]}</div><div class="insight-mini-note">${card[2]}</div></div>`).join("")}</div>${limitationsHtml}<div class="insight-writeup">${narrative}</div>`;
   }
 
   function renderCharts(yearValue) {
-    const yearLabels = yearValue === "all" ? populatedYears().map(String) : [String(yearValue)];
-    const isAll = yearValue === "all";
-    const labels = isAll ? yearLabels : companiesList;
-    const moneySeries = key => companiesList.map(company => ({ label: company, data: yearLabels.map(y => chartMoney(financialData[y]?.[company]?.[key])), borderColor: companyColors[company], backgroundColor: companyColors[company] + "99", tension: 0.25 }));
-    const singleMoney = key => companiesList.map(company => chartMoney(financialData[String(yearValue)]?.[company]?.[key]));
-    const singleRatio = key => companiesList.map(company => hasValue(financialData[String(yearValue)]?.[company]?.[key]) ? Number(financialData[String(yearValue)]?.[company]?.[key]) * 100 : null);
+    const labels = yearValue === "all" ? populatedYears().map(String) : [String(yearValue)];
+    const dataFor = key => labels.map(y => financialData[y]?.[key]);
+    const moneyFor = key => labels.map(y => chartMoney(financialData[y]?.[key]));
     Object.values(charts).forEach(chart => chart.destroy());
     charts = {};
     charts.performance = new Chart(document.getElementById("performanceChart"), {
-      type: isAll ? "line" : "bar",
-      data: { labels, datasets: isAll ? moneySeries("revenue").map(ds => ({ ...ds, label: `${ds.label} Revenue` })) : [
-        { label: "Revenue (GHS M)", data: singleMoney("revenue"), backgroundColor: companiesList.map(company => companyColors[company]) },
-        { label: "EBITDA (GHS M)", data: singleMoney("ebitda"), backgroundColor: companiesList.map(company => companyColors[company] + "CC") },
-        { label: "Net Profit (GHS M)", data: singleMoney("netProfit"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
+      type: yearValue === "all" ? "line" : "bar",
+      data: { labels, datasets: [
+        { label: "Revenue (GHS M)", data: moneyFor("revenue"), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 },
+        { label: "EBITDA (GHS M)", data: moneyFor("ebitda"), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 },
+        { label: "Net Profit (GHS M)", data: moneyFor("netProfit"), borderColor: "#E74C3C", backgroundColor: "#E74C3C99", tension: 0.25 }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.margin = new Chart(document.getElementById("marginChart"), {
-      type: isAll ? "line" : "bar",
-      data: { labels, datasets: isAll ? companiesList.map(company => ({ label: `${company} Net Profit Margin`, data: yearLabels.map(y => hasValue(financialData[y]?.[company]?.netProfitMargin) ? Number(financialData[y]?.[company]?.netProfitMargin) * 100 : null), borderColor: companyColors[company], backgroundColor: "transparent", tension: 0.25 })) : [
-        { label: "EBITDA Margin", data: singleRatio("ebitdaMargin"), backgroundColor: companiesList.map(company => companyColors[company]) },
-        { label: "Net Profit Margin", data: singleRatio("netProfitMargin"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
+      type: yearValue === "all" ? "line" : "bar",
+      data: { labels, datasets: [
+        { label: "EBITDA Margin", data: dataFor("ebitdaMargin").map(v => hasValue(v) ? Number(v) * 100 : null), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 },
+        { label: "Net Profit Margin", data: dataFor("netProfitMargin").map(v => hasValue(v) ? Number(v) * 100 : null), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "Percent", color: "#FFD966" } } } }
     });
     charts.spend = new Chart(document.getElementById("spendChart"), {
-      type: isAll ? "line" : "bar",
-      data: { labels, datasets: isAll ? moneySeries("expenditure").map(ds => ({ ...ds, label: `${ds.label} Expenditure` })) : [
-        { label: "Expenditure (GHS M)", data: singleMoney("expenditure"), backgroundColor: companiesList.map(company => companyColors[company]) },
-        { label: "Cost of Sales (GHS M)", data: singleMoney("costOfSales"), backgroundColor: companiesList.map(company => companyColors[company] + "CC") },
-        { label: "CAPEX (GHS M)", data: singleMoney("capex"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
+      type: yearValue === "all" ? "line" : "bar",
+      data: { labels, datasets: [
+        { label: "Expenditure (GHS M)", data: moneyFor("expenditure"), borderColor: "#3498DB", backgroundColor: "#3498DB99", tension: 0.25 },
+        { label: "Cost of Sales (GHS M)", data: moneyFor("costOfSales"), borderColor: "#E74C3C", backgroundColor: "#E74C3C99", tension: 0.25 },
+        { label: "CAPEX (GHS M)", data: moneyFor("capex"), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.balance = new Chart(document.getElementById("balanceChart"), {
-      type: isAll ? "line" : "bar",
-      data: { labels, datasets: isAll ? moneySeries("totalAssets").map(ds => ({ ...ds, label: `${ds.label} Total Assets` })) : [
-        { label: "Total Assets (GHS M)", data: singleMoney("totalAssets"), backgroundColor: companiesList.map(company => companyColors[company]) },
-        { label: "Total Liabilities (GHS M)", data: singleMoney("totalLiabilities"), backgroundColor: companiesList.map(company => companyColors[company] + "CC") },
-        { label: "Total Debt (GHS M)", data: singleMoney("totalDebt"), backgroundColor: companiesList.map(company => companyColors[company] + "99") }
+      type: yearValue === "all" ? "line" : "bar",
+      data: { labels, datasets: [
+        { label: "Total Assets (GHS M)", data: moneyFor("totalAssets"), borderColor: "#5DE4C7", backgroundColor: "#5DE4C799", tension: 0.25 },
+        { label: "Total Liabilities (GHS M)", data: moneyFor("totalLiabilities"), borderColor: "#E74C3C", backgroundColor: "#E74C3C99", tension: 0.25 },
+        { label: "Total Equity (GHS M)", data: moneyFor("totalEquity"), borderColor: "#FFD966", backgroundColor: "#FFD96699", tension: 0.25 },
+        { label: "Total Debt (GHS M)", data: moneyFor("totalDebt"), borderColor: "#3498DB", backgroundColor: "#3498DB99", tension: 0.25 }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
     charts.enterprise = new Chart(document.getElementById("enterpriseChart"), {
-      type: isAll ? "line" : "bar",
-      data: { labels, datasets: isAll ? moneySeries("enterpriseValue").map(ds => ({ ...ds, label: `${ds.label} Enterprise Value`, fill: false })) : [
-        { label: "Enterprise Value (GHS M)", data: singleMoney("enterpriseValue"), backgroundColor: companiesList.map(company => companyColors[company]) }
+      type: yearValue === "all" ? "line" : "bar",
+      data: { labels, datasets: [
+        { label: "Enterprise Value (GHS M)", data: moneyFor("enterpriseValue"), borderColor: "#FFD966", backgroundColor: "#FFD96699", fill: false, tension: 0.25 }
       ] },
       options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
     });
@@ -471,11 +484,11 @@
       container.innerHTML = '<div class="empty-table-note">No financial data available.</div>';
       return;
     }
-    let html = `<table><thead><tr><th>Year</th><th>Financial Item</th>${companiesList.map(company => `<th style="color:${companyColors[company] || "#5DE4C7"};">${company}</th>`).join("")}</tr></thead><tbody>`;
+    let html = '<table><thead><tr><th>Year</th><th>Financial Item</th><th>Spectrum Fibre</th></tr></thead><tbody>';
     years.forEach(y => {
+      const d = financialData[String(y)] || {};
       metricRows.forEach(item => {
-        const values = companiesList.map(company => `<td>${formatByType(financialData[String(y)]?.[company]?.[item.key], item.type)}</td>`).join("");
-        html += `<tr><td style="font-weight:900; color:#5DE4C7;">${y}</td><td class="item-name">${item.label}</td>${values}</tr>`;
+        html += `<tr><td style="font-weight:900; color:#5DE4C7;">${y}</td><td class="item-name">${item.label}</td><td>${formatByType(d[item.key], item.type)}</td></tr>`;
       });
     });
     html += '</tbody></table>';
@@ -533,58 +546,28 @@
       reader.onload = event => {
         try {
           const workbook = XLSX.read(new Uint8Array(event.target.result), { type: "array", raw: true, cellDates: false });
-          const sheetName = workbook.SheetNames.find(name => normalizeLabel(name) === "FINANCIAL EXTRACTS") || workbook.SheetNames[0];
-          if(!sheetName) throw new Error("No worksheet was found in the workbook.");
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: "", raw: true });
-          const companyAliases = [
-            { name: "Spectrum Fibre", aliases: ["SPECTRUM FIBRE", "SPECTRUM"] },
-            { name: "C Squared", aliases: ["C SQUARED", "CSQUARED", "C-SQUARED"] },
-            { name: "Comsys", aliases: ["COMSYS"] },
-            { name: "GRIDCo", aliases: ["GRIDCO", "GRIDCO"] },
-            { name: "Main One", aliases: ["MAIN ONE", "MAINONE"] }
-          ];
-          const yearMarkers = [];
-          rows.forEach((row, idx) => {
-            row.forEach(cell => {
-              const match = String(cell || "").trim().match(/^(20\d{2})$/);
-              if(match) yearMarkers.push({ year: Number(match[1]), rowIndex: idx });
-            });
-          });
-          if(!yearMarkers.length) throw new Error("No year blocks were found in the FINANCIAL EXTRACTS sheet.");
+          const sheetMatches = workbook.SheetNames.map(name => {
+            const clean = String(name).trim();
+            const exact = clean.match(/^(\d{4})$/);
+            const extract = clean.match(/^FINANCIAL\s+EXTRACTS\s+(\d{4})$/i);
+            return { name, year: exact ? Number(exact[1]) : (extract ? Number(extract[1]) : null) };
+          }).filter(item => item.year).sort((a, b) => a.year - b.year);
+          const validYears = sheetMatches.map(item => item.year);
+          if(!validYears.length) throw new Error("No sheets named with a 4-digit year were found.");
           const parsed = {};
-          yearMarkers.sort((a, b) => a.rowIndex - b.rowIndex).forEach((marker, markerIndex) => {
-            const headerRow = rows[marker.rowIndex + 1] || [];
-            const endRow = markerIndex < yearMarkers.length - 1 ? yearMarkers[markerIndex + 1].rowIndex : rows.length;
-            const companyColumns = {};
-            headerRow.forEach((cell, colIndex) => {
-              const label = normalizeLabel(cell);
-              companyAliases.forEach(company => {
-                if(company.aliases.some(alias => label === normalizeLabel(alias))) companyColumns[company.name] = colIndex;
-              });
+          sheetMatches.forEach(item => {
+            const year = item.year;
+            const sheet = workbook.Sheets[item.name];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+            const yearData = emptyYear();
+            metricRows.forEach(metric => {
+              yearData[metric.key] = findMetricInRows(rows, metric);
             });
-            const yearData = {};
-            companyAliases.forEach(company => {
-              const companyData = emptyYear();
-              const colIndex = companyColumns[company.name];
-              if(colIndex !== undefined) {
-                metricRows.forEach(metric => {
-                  for(let r = marker.rowIndex + 2; r < endRow; r++) {
-                    const row = rows[r] || [];
-                    const rowLabel = normalizeLabel(row[1] || row[0]);
-                    if(metric.aliases.some(alias => rowLabel === normalizeLabel(alias))) {
-                      companyData[metric.key] = parseNumeric(row[colIndex], metric.type);
-                      break;
-                    }
-                  }
-                });
-                if(companyData.netProfitMargin === null && hasValue(companyData.netProfit) && hasValue(companyData.revenue) && Number(companyData.revenue) !== 0) companyData.netProfitMargin = Number(companyData.netProfit) / Number(companyData.revenue);
-                if(companyData.ebitdaMargin === null && hasValue(companyData.ebitda) && hasValue(companyData.revenue) && Number(companyData.revenue) !== 0) companyData.ebitdaMargin = Number(companyData.ebitda) / Number(companyData.revenue);
-              }
-              yearData[company.name] = companyData;
-            });
-            parsed[String(marker.year)] = yearData;
+            if(yearData.netProfitMargin === null && hasValue(yearData.netProfit) && hasValue(yearData.revenue) && Number(yearData.revenue) !== 0) yearData.netProfitMargin = Number(yearData.netProfit) / Number(yearData.revenue);
+            if(yearData.ebitdaMargin === null && hasValue(yearData.ebitda) && hasValue(yearData.revenue) && Number(yearData.revenue) !== 0) yearData.ebitdaMargin = Number(yearData.ebitda) / Number(yearData.revenue);
+            parsed[String(year)] = yearData;
           });
-          resolve({ version: 1, savedAt: new Date().toISOString(), years: yearMarkers.map(item => item.year), companies: companyAliases.map(item => item.name), financial: parsed });
+          resolve({ version: 1, savedAt: new Date().toISOString(), years: validYears, financial: parsed });
         } catch(error) {
           reject(error);
         }
@@ -637,15 +620,13 @@
         changes.push(`New year sheet detected: ${year}.`);
         return;
       }
-      (newPayload.companies || companiesList).forEach(company => {
-        metricRows.forEach(metric => {
-          const oldVal = comparableValue(oldData?.[company]?.[metric.key]);
-          const newVal = comparableValue(newData?.[company]?.[metric.key]);
-          if(oldVal === null && newVal === null) return;
-          if(oldVal === null || newVal === null || Math.abs(oldVal - newVal) > 0.000001) {
-            changes.push(`${year} ${company} ${metric.label}: ${formatByType(oldVal, metric.type)} changed to ${formatByType(newVal, metric.type)}.`);
-          }
-        });
+      metricRows.forEach(metric => {
+        const oldVal = comparableValue(oldData?.[metric.key]);
+        const newVal = comparableValue(newData[metric.key]);
+        if(oldVal === null && newVal === null) return;
+        if(oldVal === null || newVal === null || Math.abs(oldVal - newVal) > 0.000001) {
+          changes.push(`${year} ${metric.label}: ${formatByType(oldVal, metric.type)} changed to ${formatByType(newVal, metric.type)}.`);
+        }
       });
     });
     oldYears.forEach(year => {
@@ -657,7 +638,6 @@
   function applyPayload(payload) {
     currentPayload = payload;
     financialData = payload.financial || {};
-    companiesList = payload.companies || COMPANIES;
     yearsList = normalizeYears(payload.years || Object.keys(financialData));
     renderAll();
   }
@@ -692,18 +672,16 @@
   }
 
   function exportCsv() {
-    const rows = [["Year", "Financial Item", ...companiesList]];
+    const rows = [["Year", "Financial Item", "Spectrum Fibre"]];
     getTableYears().forEach(year => {
-      metricRows.forEach(metric => rows.push([year, metric.label, ...companiesList.map(company => {
-        const value = financialData[String(year)]?.[company]?.[metric.key];
-        return hasValue(value) ? value : "";
-      })]));
+      const d = financialData[String(year)] || {};
+      metricRows.forEach(metric => rows.push([year, metric.label, hasValue(d[metric.key]) ? d[metric.key] : ""]));
     });
     const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "fiber_financial_data.csv";
+    link.download = "spectrum_fibre_financial_data.csv";
     link.click();
     URL.revokeObjectURL(link.href);
   }
@@ -726,11 +704,11 @@
     document.getElementById("dashboardNotes").value = "";
     saveNotes();
   });
-  document.getElementById("downloadPerformanceBtn").onclick = () => downloadChart("performanceChart", "fiber_performance");
-  document.getElementById("downloadMarginBtn").onclick = () => downloadChart("marginChart", "fiber_margins");
-  document.getElementById("downloadSpendBtn").onclick = () => downloadChart("spendChart", "fiber_spend");
-  document.getElementById("downloadBalanceBtn").onclick = () => downloadChart("balanceChart", "fiber_balance_sheet");
-  document.getElementById("downloadEvBtn").onclick = () => downloadChart("enterpriseChart", "fiber_enterprise_value");
+  document.getElementById("downloadPerformanceBtn").onclick = () => downloadChart("performanceChart", "spectrum_fibre_performance");
+  document.getElementById("downloadMarginBtn").onclick = () => downloadChart("marginChart", "spectrum_fibre_margins");
+  document.getElementById("downloadSpendBtn").onclick = () => downloadChart("spendChart", "spectrum_fibre_spend");
+  document.getElementById("downloadBalanceBtn").onclick = () => downloadChart("balanceChart", "spectrum_fibre_balance_sheet");
+  document.getElementById("downloadEvBtn").onclick = () => downloadChart("enterpriseChart", "spectrum_fibre_enterprise_value");
   document.getElementById("downloadTableBtn").onclick = exportCsv;
   loadNotes();
   renderAll();
