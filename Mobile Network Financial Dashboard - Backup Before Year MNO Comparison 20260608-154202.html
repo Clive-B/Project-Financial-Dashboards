@@ -122,14 +122,13 @@
         <select id="yearSelect"></select>
       </div>
       <div class="year-selector">
-        <label><i class="fas fa-code-compare"></i> Compare:</label>
-        <select id="compareYearSelect"></select>
-      </div>
-      <div class="year-selector">
         <label><i class="fas fa-network-wired"></i> Network:</label>
-        <label><input type="checkbox" class="mno-checkbox" value="MTN" checked> MTN</label>
-        <label><input type="checkbox" class="mno-checkbox" value="Telecel" checked> Telecel</label>
-        <label><input type="checkbox" class="mno-checkbox" value="AT" checked> AT</label>
+        <select id="networkSelect">
+          <option value="Industry">Industry</option>
+          <option value="MTN">MTN</option>
+          <option value="Telecel">Telecel</option>
+          <option value="AT">AT</option>
+        </select>
       </div>
       <div class="ai-badge"><i class="fas fa-microchip"></i> AI Linear Forecast</div>
     </div>
@@ -234,17 +233,9 @@
   const DEFAULT_MARKET_SHARE_PAYLOAD = {"version":2,"savedAt":"embedded-from-uploaded-financial-workbook-market-share-section","marketShare":{"revenue":{"2017":{"MTN":0.6586206072124409,"Telecel":0.23759192397283097,"AT":0.10378746881472818},"2018":{"MTN":0.6722246290909802,"Telecel":0.24249946208581333,"AT":0.08527590882320644},"2019":{"MTN":0.6669836252910001,"Telecel":0.20659427144901144,"AT":0.12642210325998846},"2020":{"MTN":0.7014545936864445,"Telecel":0.1912567146016857,"AT":0.10728869171186987},"2021":{"MTN":0.6852326973455701,"Telecel":0.14428410398331537,"AT":0.17048319867111453},"2022":{"MTN":0.7945598612578136,"Telecel":0.13710715281079397,"AT":0.0683329859313924},"2023":{"MTN":0.8288978723358214,"Telecel":0.12240000544076621,"AT":0.04870212222341239},"2024":{"MTN":0.8827851516989677,"Telecel":0.11721484830103239,"AT":0.11721484830103239},"2025":{"MTN":1.0,"Telecel":0.0,"AT":0.0}},"profitability":{"2017":{"MTN":0.3626722453786165,"Telecel":0.6373277546213835,"AT":0.0},"2018":{"MTN":0.5103145446573383,"Telecel":0.8967811213608559,"AT":-0.40709566601819414},"2019":{"MTN":7.666331864167102,"Telecel":-9.396721138152287,"AT":2.730389273985185},"2020":{"MTN":2.5713878258728418,"Telecel":-0.7247391478316183,"AT":-0.8466486780412233},"2021":{"MTN":0.8573305344103311,"Telecel":-0.07219121671764155,"AT":0.21486068230731037},"2022":{"MTN":1.6669043412535443,"Telecel":-0.4194093879600136,"AT":-0.2474949532935306},"2023":{"MTN":2.987174974216936,"Telecel":-1.5090786005398749,"AT":-0.47809637367706154},"2024":{"MTN":1.240913041211629,"Telecel":-0.24091304121162888,"AT":-0.24091304121162888},"2025":{"MTN":1.0,"Telecel":0.0,"AT":0.0}},"enterprise":{"2017":{"MTN":0.859546471024178,"Telecel":-0.15931371227019434,"AT":0.2997672412460163},"2018":{"MTN":0.859546471024178,"Telecel":-0.15931371227019434,"AT":0.2997672412460163},"2019":{"MTN":1.0831708689188129,"Telecel":0.008041893361936205,"AT":-0.09121276228074916},"2020":{"MTN":1.312461237933221,"Telecel":-0.23759081882121533,"AT":-0.07487041911200579},"2021":{"MTN":1.2425519423610079,"Telecel":-0.14015219438026985,"AT":-0.10239974798073798},"2022":{"MTN":1.4674738954597324,"Telecel":-0.22802349794494164,"AT":-0.23945039751479083},"2023":{"MTN":1.435829616194057,"Telecel":-0.08951437500365565,"AT":-0.34631524119040125},"2024":{"MTN":1.1702994905192412,"Telecel":0.0,"AT":-0.1702994905192412},"2025":{"MTN":1.0,"Telecel":0.0,"AT":0.0}}},"years":[2017,2018,2019,2020,2021,2022,2023,2024,2025]};
 
   function getSelectedCompanies() {
-    const checked = Array.from(document.querySelectorAll(".mno-checkbox:checked")).map(input => input.value).filter(value => companies.includes(value));
-    return checked.length ? checked : companies;
-  }
-
-  function getDashboardYearSelection() {
-    const primary = document.getElementById("yearSelect")?.value || "all";
-    const compare = document.getElementById("compareYearSelect")?.value || "";
-    if(primary !== "all" && compare && compare !== primary) {
-      return "compare:" + [Number(primary), Number(compare)].filter(y => !isNaN(y)).sort((a,b)=>a-b).join(",");
-    }
-    return primary;
+    const networkSelect = document.getElementById("networkSelect");
+    const selectedNetwork = networkSelect ? networkSelect.value : "Industry";
+    return selectedNetwork === "Industry" ? companies : [selectedNetwork];
   }
 
   function formatMoney(v) {
@@ -358,22 +349,21 @@
     return 0;
   }
 
-  function renderTrendAnalysisChart(selectedYear = getDashboardYearSelection()) {
+  function renderTrendAnalysisChart() {
     const trendCanvas = document.getElementById("trendAnalysisChart");
     if(!trendCanvas || !yearsList || yearsList.length === 0) return;
-    const scopeYears = getSelectedYearRange(selectedYear);
     const activeCompanies = getSelectedCompanies();
     const cfg = trendMetricConfig[activeTrendMetric] || trendMetricConfig.operatingEfficiency;
     const trendTitle = document.getElementById("trendTitle");
     if(trendTitle) trendTitle.innerHTML = `📊 Financial Trend Analysis - ${cfg.label}`;
-    const trendLabels = scopeYears.map(y=>y.toString());
+    const trendLabels = yearsList.map(y=>y.toString());
     let trendDatasets = [];
     if(activeCompanies.length > 1) {
-      trendDatasets.push({ label: `Industry ${cfg.label}`, data: scopeYears.map(y=> getTrendSeriesValue(y, "Industry", activeTrendMetric)), borderColor: "#5DE4C7", backgroundColor: "transparent", fill: false, tension: 0.2 });
-      activeCompanies.forEach(comp => trendDatasets.push({ label: `${comp} ${cfg.label}`, data: scopeYears.map(y=> getTrendSeriesValue(y, comp, activeTrendMetric)), borderColor: companyColors[comp], backgroundColor: "transparent", borderDash: [5,5], fill: false, tension: 0.2 }));
+      trendDatasets.push({ label: `Industry ${cfg.label}`, data: yearsList.map(y=> getTrendSeriesValue(y, "Industry", activeTrendMetric)), borderColor: "#5DE4C7", backgroundColor: "transparent", fill: false, tension: 0.2 });
+      activeCompanies.forEach(comp => trendDatasets.push({ label: `${comp} ${cfg.label}`, data: yearsList.map(y=> getTrendSeriesValue(y, comp, activeTrendMetric)), borderColor: companyColors[comp], backgroundColor: "transparent", borderDash: [5,5], fill: false, tension: 0.2 }));
     } else {
       const comp = activeCompanies[0];
-      trendDatasets.push({ label: `${comp} ${cfg.label}`, data: scopeYears.map(y=> getTrendSeriesValue(y, comp, activeTrendMetric)), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 });
+      trendDatasets.push({ label: `${comp} ${cfg.label}`, data: yearsList.map(y=> getTrendSeriesValue(y, comp, activeTrendMetric)), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 });
     }
     if(charts.trendAnalysisChart) charts.trendAnalysisChart.destroy();
     charts.trendAnalysisChart = new Chart(trendCanvas, { type: 'line', data: { labels: trendLabels, datasets: trendDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: cfg.axis, color: "#FFD966" } } } } });
@@ -393,10 +383,6 @@
   function getSelectedYearRange(selectedYear) {
     if(!yearsList || yearsList.length === 0) return [];
     if(selectedYear === "all") return yearsList;
-    if(String(selectedYear).startsWith("compare:")) {
-      const selectedYears = String(selectedYear).replace("compare:", "").split(",").map(Number).filter(y => yearsList.includes(y));
-      return [...new Set(selectedYears)].sort((a,b)=>a-b);
-    }
     const y = parseInt(selectedYear);
     return isNaN(y) ? yearsList : [y];
   }
@@ -523,7 +509,7 @@
     }
 
     const activeCompanies = getSelectedCompanies();
-    const selectedNetwork = activeCompanies.length === companies.length ? "Industry" : activeCompanies.join(", ");
+    const selectedNetwork = document.getElementById("networkSelect")?.value || "Industry";
     const yearsInScope = getSelectedYearRange(selectedYear);
     const latestYear = getLatestAvailableYearForScope(activeCompanies, selectedYear);
     const previousYear = latestYear ? getPreviousAvailableYearForScope(activeCompanies, selectedYear, latestYear) : null;
@@ -879,7 +865,7 @@
     regulatoryYearsList = (payload.years || []).map(Number).sort((a,b)=>a-b);
     if(regulatoryYearsList.length === 0) return false;
     recalculateRegulatoryFeeRates();
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect")?.value || "all";
     renderRegulatoryFeeAnalytics(selectedYear);
     return true;
   }
@@ -898,9 +884,6 @@
   function getRegulatorySelectedYears(selectedYear) {
     if(!regulatoryYearsList || regulatoryYearsList.length === 0) return [];
     if(selectedYear === "all") return regulatoryYearsList;
-    if(String(selectedYear).startsWith("compare:")) {
-      return getSelectedYearRange(selectedYear).filter(y => regulatoryYearsList.includes(y));
-    }
     const y = parseInt(selectedYear);
     return isNaN(y) || !regulatoryYearsList.includes(y) ? regulatoryYearsList : [y];
   }
@@ -1033,7 +1016,7 @@
       marketShareData = normalized.marketShare || {};
       marketShareYearsList = (normalized.years || []).map(Number).sort((a,b)=>a-b);
     }
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect")?.value || "all";
     renderMarketShareAnalytics(selectedYear);
     return true;
   }
@@ -1060,9 +1043,6 @@
     const availableYears = marketShareYearsList.length ? marketShareYearsList : yearsList;
     if(!availableYears || availableYears.length === 0) return [];
     if(selectedYear === "all") return availableYears;
-    if(String(selectedYear).startsWith("compare:")) {
-      return getSelectedYearRange(selectedYear).filter(y => availableYears.includes(y));
-    }
     const y = parseInt(selectedYear);
     return isNaN(y) ? availableYears : [y];
   }
@@ -1106,7 +1086,7 @@
       const y = parseInt(filter);
       return isNaN(y) ? [] : [y];
     }
-    return getMarketShareSelectedYears(dashboardSelectedYear);
+    return dashboardSelectedYear === "all" ? availableYears : [parseInt(dashboardSelectedYear)];
   }
 
   function populateMarketShareTableYearFilter() {
@@ -1164,13 +1144,8 @@
     const cfg = getActiveMarketShareMetricConfig();
     const activeCompanies = getSelectedCompanies();
     const selectedYears = getMarketShareSelectedYears(selectedYear);
-    if(!selectedYears.length) {
-      if(status) status.textContent = "No market share data is available for the selected year scope.";
-      if(tableContainer) tableContainer.innerHTML = '<div class="empty-table-note">No market share data available for the selected year scope.</div>';
-      return;
-    }
-    const latestYear = Math.max(...selectedYears);
-    const scopeText = selectedYears.length > 1 ? `${Math.min(...selectedYears)}-${Math.max(...selectedYears)}` : `${latestYear}`;
+    const latestYear = selectedYear === "all" ? Math.max(...selectedYears) : selectedYears[0];
+    const scopeText = selectedYear === "all" ? `${Math.min(...selectedYears)}–${Math.max(...selectedYears)}` : `${latestYear}`;
     const leader = activeCompanies.map(comp => ({ comp, value: getMarketShareValue(latestYear, comp) })).sort((a,b)=>b.value-a.value)[0];
 
     if(status) status.innerHTML = `${cfg.label} data loaded from the workbook MARKET SHARE section for <strong>${availableYears[0]}–${availableYears[availableYears.length-1]}</strong>. Current scope: <strong>${scopeText}</strong>. ${leader ? `Leading operator in ${latestYear}: <strong>${leader.comp}</strong> with <strong>${formatPercent(leader.value)}</strong>.` : ""}`;
@@ -1178,10 +1153,10 @@
     const trendTitle = document.querySelector("#marketSharePanel .chart-card .chart-header h3");
     if(trendTitle) trendTitle.textContent = `${cfg.label} Trend`;
 
-    const trendLabels = selectedYears.map(y => y.toString());
+    const trendLabels = availableYears.map(y => y.toString());
     const trendDatasets = activeCompanies.map(comp => ({
       label: `${comp} ${cfg.label}`,
-      data: selectedYears.map(y => getMarketShareValue(y, comp) * 100),
+      data: availableYears.map(y => getMarketShareValue(y, comp) * 100),
       borderColor: companyColors[comp],
       backgroundColor: "transparent",
       fill: false,
@@ -1258,13 +1233,7 @@
     recalculateRegulatoryFeeRates();
     const activeCompanies = getSelectedCompanies();
     const selectedYears = getRegulatorySelectedYears(selectedYear);
-    if(!selectedYears.length) {
-      if(status) status.textContent = "No regulatory fee data is available for the selected year scope.";
-      if(tableContainer) tableContainer.innerHTML = '<div class="empty-table-note">No regulatory fee data available for the selected year scope.</div>';
-      return;
-    }
-    const hasMultiYearScope = selectedYears.length > 1;
-    const scopeText = hasMultiYearScope ? `${Math.min(...selectedYears)}-${Math.max(...selectedYears)}` : `${selectedYears[0]}`;
+    const scopeText = selectedYear === "all" ? `${Math.min(...selectedYears)}–${Math.max(...selectedYears)}` : `${selectedYears[0]}`;
     const totalReceived = selectedYears.reduce((sum, y) => sum + activeCompanies.reduce((s, c) => s + (regulatoryData[y]?.[c]?.paymentReceived || 0), 0), 0);
     const totalRevenue = selectedYears.reduce((sum, y) => sum + activeCompanies.reduce((s, c) => s + (financialData[y]?.[c]?.revenue || 0), 0), 0);
     const effectiveRate = totalRevenue ? totalReceived / totalRevenue : 0;
@@ -1272,7 +1241,7 @@
     if(status) status.innerHTML = `Regulatory fee workbook loaded for <strong>${regulatoryYearsList[0]}–${regulatoryYearsList[regulatoryYearsList.length-1]}</strong>. Current scope: <strong>${scopeText}</strong>. Total received: <strong>${formatMoney(totalReceived)}</strong>. Effective received fee-to-revenue rate: <strong>${formatPercent(effectiveRate)}</strong>.`;
 
     let feeLabels, feeDatasets, rateLabels, rateDatasets;
-    if(hasMultiYearScope) {
+    if(selectedYear === "all") {
       feeLabels = selectedYears.map(y => y.toString());
       feeDatasets = activeCompanies.map(comp => ({ label: `${comp} Fees Received`, data: selectedYears.map(y => (regulatoryData[y]?.[comp]?.paymentReceived || 0) / 1e6), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 }));
       if(activeCompanies.length > 1) feeDatasets.unshift({ label: "Industry Fees Received", data: selectedYears.map(y => activeCompanies.reduce((sum, comp) => sum + (regulatoryData[y]?.[comp]?.paymentReceived || 0), 0) / 1e6), borderColor: "#5DE4C7", backgroundColor: "transparent", borderWidth: 4, fill: false, tension: 0.2 });
@@ -1297,10 +1266,10 @@
     }
 
     if(charts.regulatoryFeeChart) charts.regulatoryFeeChart.destroy();
-    charts.regulatoryFeeChart = new Chart(feeCanvas, { type: hasMultiYearScope ? "line" : "bar", data: { labels: feeLabels, datasets: feeDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } } });
+    charts.regulatoryFeeChart = new Chart(feeCanvas, { type: selectedYear === "all" ? "line" : "bar", data: { labels: feeLabels, datasets: feeDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } } });
 
     if(charts.regulatoryFeeRateChart) charts.regulatoryFeeRateChart.destroy();
-    charts.regulatoryFeeRateChart = new Chart(rateCanvas, { type: hasMultiYearScope ? "line" : "bar", data: { labels: rateLabels, datasets: rateDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: "% of Revenue", color: "#FFD966" } } } } });
+    charts.regulatoryFeeRateChart = new Chart(rateCanvas, { type: selectedYear === "all" ? "line" : "bar", data: { labels: rateLabels, datasets: rateDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: "% of Revenue", color: "#FFD966" } } } } });
 
     buildRegulatoryFeeTable(selectedYear);
   }
@@ -1325,29 +1294,26 @@
     const kpiContainer = document.getElementById("kpiContainer");
     if(!kpiContainer) return;
     const activeCompanies = getSelectedCompanies();
-    const scopeYears = getSelectedYearRange(selectedYear);
     let kpis = [];
-    if(scopeYears.length > 1) {
+    if(selectedYear === "all") {
       let total = { MTN:0, Telecel:0, AT:0 };
-      scopeYears.forEach(y => {
+      yearsList.forEach(y => {
         activeCompanies.forEach(c => { total[c] += financialData[y]?.[c]?.revenue || 0; });
       });
-      const scopeLabel = selectedYear === "all" ? "All years sum" : `${scopeYears[0]}-${scopeYears[scopeYears.length - 1]} comparison`;
-      kpis = activeCompanies.map(c => ({ title: `${c} Total Revenue`, value: formatMoney(total[c]), sub: scopeLabel, color: companyColors[c] }));
+      kpis = activeCompanies.map(c => ({ title: `${c} Total Revenue`, value: formatMoney(total[c]), sub: "All years sum", color: companyColors[c] }));
       if(activeCompanies.length > 1) {
-        kpis.push({ title: "Market Size", value: formatMoney(activeCompanies.reduce((a,c)=>a+total[c],0)), sub: `${scopeYears.length} years`, color: "#5DE4C7" });
+        kpis.push({ title: "Market Size", value: formatMoney(activeCompanies.reduce((a,c)=>a+total[c],0)), sub: `${yearsList.length} years`, color: "#5DE4C7" });
       }
     } else {
-      const y = scopeYears[0] || parseInt(selectedYear);
-      const yd = financialData[y];
+      const yd = financialData[selectedYear];
       if(yd) {
         activeCompanies.forEach(c => {
           const d = yd[c];
-          kpis.push({ title: `${c} ${y} Revenue`, value: formatMoney(d?.revenue), sub: `Net Profit: ${formatMoney(d?.netProfit)} | Margin: ${formatPercent(d?.margin||0)}`, color: companyColors[c] });
+          kpis.push({ title: `${c} ${selectedYear} Revenue`, value: formatMoney(d?.revenue), sub: `Net Profit: ${formatMoney(d?.netProfit)} | Margin: ${formatPercent(d?.margin||0)}`, color: companyColors[c] });
         });
         if(activeCompanies.length > 1) {
           const tot = activeCompanies.reduce((a,c)=> a + (yd[c]?.revenue||0), 0);
-          kpis.push({ title: "Industry Total Revenue", value: formatMoney(tot), sub: `${y}`, color: "#5DE4C7" });
+          kpis.push({ title: "Industry Total Revenue", value: formatMoney(tot), sub: `${selectedYear}`, color: "#5DE4C7" });
         }
       }
     }
@@ -1357,13 +1323,11 @@
   function renderAllCharts(selectedYear) {
     if(!yearsList || yearsList.length === 0) return;
     const isAll = (selectedYear === "all");
-    const scopeYears = getSelectedYearRange(selectedYear);
-    const hasMultiYearScope = scopeYears.length > 1;
     const activeCompanies = getSelectedCompanies();
     // 1. YoY Growth
     let yoyLabels = [], yoyDatasets = [];
-    if(hasMultiYearScope) {
-      const yoyYears = scopeYears.filter(y => yearsList.includes(y - 1));
+    if(isAll) {
+      const yoyYears = yearsList.filter(y => y > Math.min(...yearsList));
       yoyLabels = yoyYears.map(y=>y.toString());
       activeCompanies.forEach(comp => {
         let data = yoyYears.map(y => {
@@ -1382,25 +1346,25 @@
       } else { yoyLabels = activeCompanies; yoyDatasets = [{ label: "No prior year", data: activeCompanies.map(()=>0), backgroundColor: "#95A5A6" }]; }
     }
     if(charts.yoyChart) charts.yoyChart.destroy();
-    charts.yoyChart = new Chart(document.getElementById("yoyChart"), { type: hasMultiYearScope ? 'line' : 'bar', data: { labels: yoyLabels, datasets: yoyDatasets }, options: { responsive: true } });
+    charts.yoyChart = new Chart(document.getElementById("yoyChart"), { type: isAll ? 'line' : 'bar', data: { labels: yoyLabels, datasets: yoyDatasets }, options: { responsive: true } });
 
     // 2. Profitability Analysis
     let profitLabels, profitDatasets;
     const profitCfg = profitMetricConfig[activeProfitMetric] || profitMetricConfig.netProfit;
     const profitabilityTitle = document.getElementById("profitabilityTitle");
     if(profitabilityTitle) profitabilityTitle.innerHTML = `📊 Profitability Analysis - ${profitCfg.label}`;
-    if(hasMultiYearScope) {
-      profitLabels = scopeYears.map(y=>y.toString());
-      profitDatasets = activeCompanies.map(comp => ({ label: `${comp} ${profitCfg.label}`, data: scopeYears.map(y=> getProfitChartDisplayValue(y, comp, activeProfitMetric)), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 }));
+    if(isAll) {
+      profitLabels = yearsList.map(y=>y.toString());
+      profitDatasets = activeCompanies.map(comp => ({ label: `${comp} ${profitCfg.label}`, data: yearsList.map(y=> getProfitChartDisplayValue(y, comp, activeProfitMetric)), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 }));
     } else {
       profitLabels = activeCompanies;
       profitDatasets = [{ label: profitCfg.type === "money" ? `${profitCfg.label} (GHS M)` : `${profitCfg.label} (%)`, data: activeCompanies.map(c=> getProfitChartDisplayValue(selectedYear, c, activeProfitMetric)), backgroundColor: activeCompanies.map(c=>companyColors[c]) }];
     }
     if(charts.profitChart) charts.profitChart.destroy();
-    charts.profitChart = new Chart(document.getElementById("profitAnalysisChart"), { type: hasMultiYearScope ? 'line' : 'bar', data: { labels: profitLabels, datasets: profitDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: getProfitAxisLabel(activeProfitMetric), color: "#FFD966" } } } } });
+    charts.profitChart = new Chart(document.getElementById("profitAnalysisChart"), { type: isAll ? 'line' : 'bar', data: { labels: profitLabels, datasets: profitDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: getProfitAxisLabel(activeProfitMetric), color: "#FFD966" } } } } });
 
     // 3. Benchmark (latest year or selected)
-    const benchYear = Math.max(...scopeYears);
+    const benchYear = isAll ? Math.max(...yearsList) : parseInt(selectedYear);
     const benchLabels = activeCompanies;
     const benchDatasets = [
       { label: "Revenue (GHS M)", data: activeCompanies.map(c=> (financialData[benchYear]?.[c]?.revenue||0)/1e6), backgroundColor: activeCompanies.map(c=>companyColors[c]) },
@@ -1412,29 +1376,29 @@
 
     // 4. Enterprise Value
     let evLabels, evDatasets;
-    if(hasMultiYearScope) {
-      evLabels = scopeYears.map(y=>y.toString());
-      evDatasets = activeCompanies.map(comp => ({ label: comp, data: scopeYears.map(y=> getEnterpriseValue(y, comp)/1e6), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 }));
+    if(isAll) {
+      evLabels = yearsList.map(y=>y.toString());
+      evDatasets = activeCompanies.map(comp => ({ label: comp, data: yearsList.map(y=> getEnterpriseValue(y, comp)/1e6), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 }));
     } else {
       evLabels = activeCompanies;
       evDatasets = [{ label: `Enterprise Value (GHS M) - ${selectedYear}`, data: activeCompanies.map(c=> getEnterpriseValue(parseInt(selectedYear), c)/1e6), backgroundColor: activeCompanies.map(c=>companyColors[c]) }];
     }
     if(charts.evChart) charts.evChart.destroy();
-    charts.evChart = new Chart(document.getElementById("evChart"), { type: hasMultiYearScope ? 'line' : 'bar', data: { labels: evLabels, datasets: evDatasets }, options: { responsive: true } });
+    charts.evChart = new Chart(document.getElementById("evChart"), { type: isAll ? 'line' : 'bar', data: { labels: evLabels, datasets: evDatasets }, options: { responsive: true } });
 
     // 5. Assets vs Liabilities
     let assetsLabels, assetsDatasets;
-    const industryAssetData = scopeYears.map(y => companies.reduce((sum, comp) => sum + (financialData[y]?.[comp]?.totalAssets || 0), 0) / 1e6);
-    const industryLiabilityData = scopeYears.map(y => companies.reduce((sum, comp) => sum + (liabilitiesData[y]?.[comp] || 0), 0) / 1e6);
-    if(hasMultiYearScope) {
-      assetsLabels = scopeYears.map(y=>y.toString());
+    const industryAssetData = yearsList.map(y => companies.reduce((sum, comp) => sum + (financialData[y]?.[comp]?.totalAssets || 0), 0) / 1e6);
+    const industryLiabilityData = yearsList.map(y => companies.reduce((sum, comp) => sum + (liabilitiesData[y]?.[comp] || 0), 0) / 1e6);
+    if(isAll) {
+      assetsLabels = yearsList.map(y=>y.toString());
       let ds = [
         { label: "Industry Total Assets", data: industryAssetData, borderColor: "#5DE4C7", backgroundColor: "transparent", borderWidth: 4, fill: false, tension: 0.2 },
         { label: "Industry Total Liabilities", data: industryLiabilityData, borderColor: "#FFFFFF", backgroundColor: "transparent", borderWidth: 4, borderDash: [8,4], fill: false, tension: 0.2 }
       ];
       activeCompanies.forEach(comp => {
-        ds.push({ label: `${comp} Assets`, data: scopeYears.map(y=> (financialData[y]?.[comp]?.totalAssets||0)/1e6), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 });
-        ds.push({ label: `${comp} Liabilities`, data: scopeYears.map(y=> (liabilitiesData[y]?.[comp]||0)/1e6), borderColor: companyColors[comp], backgroundColor: "transparent", borderDash: [5,5], fill: false, tension: 0.2 });
+        ds.push({ label: `${comp} Assets`, data: yearsList.map(y=> (financialData[y]?.[comp]?.totalAssets||0)/1e6), borderColor: companyColors[comp], backgroundColor: "transparent", fill: false, tension: 0.2 });
+        ds.push({ label: `${comp} Liabilities`, data: yearsList.map(y=> (liabilitiesData[y]?.[comp]||0)/1e6), borderColor: companyColors[comp], backgroundColor: "transparent", borderDash: [5,5], fill: false, tension: 0.2 });
       });
       assetsDatasets = ds;
     } else {
@@ -1449,10 +1413,10 @@
       ];
     }
     if(charts.assetsChart) charts.assetsChart.destroy();
-    charts.assetsChart = new Chart(document.getElementById("assetsLiabChart"), { type: hasMultiYearScope ? 'line' : 'bar', data: { labels: assetsLabels, datasets: assetsDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } } });
+    charts.assetsChart = new Chart(document.getElementById("assetsLiabChart"), { type: isAll ? 'line' : 'bar', data: { labels: assetsLabels, datasets: assetsDatasets }, options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } } });
 
     // 6. Consolidated Financial Trend Analysis
-    renderTrendAnalysisChart(selectedYear);
+    renderTrendAnalysisChart();
 
     // Re-render main two charts
     renderMainCharts(selectedYear);
@@ -1464,11 +1428,10 @@
 
   function getChartData(selectedYear) {
     const activeCompanies = getSelectedCompanies();
-    const scopeYears = getSelectedYearRange(selectedYear);
-    if(scopeYears.length > 1) {
-      return { labels: scopeYears.map(y=>y.toString()), datasets: activeCompanies.map(c => ({ label: `${c} Revenue`, data: scopeYears.map(y=>financialData[y]?.[c]?.revenue||0), borderColor: companyColors[c], backgroundColor: "transparent", tension: 0.2, fill: false })) };
+    if(selectedYear === "all") {
+      return { labels: yearsList.map(y=>y.toString()), datasets: activeCompanies.map(c => ({ label: `${c} Revenue`, data: yearsList.map(y=>financialData[y]?.[c]?.revenue||0), borderColor: companyColors[c], backgroundColor: "transparent", tension: 0.2, fill: false })) };
     } else {
-      const yd = financialData[scopeYears[0] || selectedYear];
+      const yd = financialData[selectedYear];
       return { labels: activeCompanies, datasets: [
         { label: "Revenue", data: activeCompanies.map(c=>yd?.[c]?.revenue||0), backgroundColor: activeCompanies.map(c=>companyColors[c]) },
         { label: "EBITDA", data: activeCompanies.map(c=>yd?.[c]?.ebitda||0), backgroundColor: activeCompanies.map(c=>companyColors[c]+"CC") }
@@ -1477,19 +1440,17 @@
   }
   function getMarginChartData(selectedYear) {
     const activeCompanies = getSelectedCompanies();
-    const scopeYears = getSelectedYearRange(selectedYear);
-    if(scopeYears.length > 1) {
-      return { labels: scopeYears.map(y=>y.toString()), datasets: activeCompanies.map(c => ({ label: `${c} Net Margin %`, data: scopeYears.map(y=>getSafeRatio(y, c, "margin", "netProfit")*100), borderColor: companyColors[c], backgroundColor: "transparent", tension: 0.2, fill: false })) };
+    if(selectedYear === "all") {
+      return { labels: yearsList.map(y=>y.toString()), datasets: activeCompanies.map(c => ({ label: `${c} Net Margin %`, data: yearsList.map(y=>getSafeRatio(y, c, "margin", "netProfit")*100), borderColor: companyColors[c], backgroundColor: "transparent", tension: 0.2, fill: false })) };
     } else {
-      const y = scopeYears[0] || selectedYear;
-      const yd = financialData[y];
-      return { labels: activeCompanies, datasets: [{ label: "Net Margin %", data: activeCompanies.map(c=>getSafeRatio(y, c, "margin", "netProfit")*100), backgroundColor: activeCompanies.map(c=>companyColors[c]) }] };
+      const yd = financialData[selectedYear];
+      return { labels: activeCompanies, datasets: [{ label: "Net Margin %", data: activeCompanies.map(c=>getSafeRatio(selectedYear, c, "margin", "netProfit")*100), backgroundColor: activeCompanies.map(c=>companyColors[c]) }] };
     }
   }
   let mainChart;
   function renderMainCharts(selectedYear) {
     if(mainChart) mainChart.destroy();
-    mainChart = new Chart(document.getElementById("mainChart"), { type: getSelectedYearRange(selectedYear).length > 1 ? 'line':'bar', data: getChartData(selectedYear), options: { responsive: true } });
+    mainChart = new Chart(document.getElementById("mainChart"), { type: selectedYear==="all"?'line':'bar', data: getChartData(selectedYear), options: { responsive: true } });
   }
 
 
@@ -1551,7 +1512,7 @@
       const y = parseInt(filter);
       return isNaN(y) ? [] : [y];
     }
-    return getSelectedYearRange(dashboardSelectedYear);
+    return dashboardSelectedYear === "all" ? yearsList : [parseInt(dashboardSelectedYear)];
   }
 
   function formatTableValue(value, type) {
@@ -1685,18 +1646,11 @@
 
   function updateYearDropdown() {
     const select = document.getElementById("yearSelect");
-    const compareSelect = document.getElementById("compareYearSelect");
     if(!select) return;
     let options = '<option value="all">📊 ALL YEARS (Trend)</option>';
     yearsList.forEach(y => { options += `<option value="${y}">${y}</option>`; });
     select.innerHTML = options;
     select.value = "all";
-    if(compareSelect) {
-      let compareOptions = '<option value="">No comparison</option>';
-      yearsList.forEach(y => { compareOptions += `<option value="${y}">${y}</option>`; });
-      compareSelect.innerHTML = compareOptions;
-      compareSelect.value = "";
-    }
     populateTableYearFilter();
     populateMarketShareTableYearFilter();
   }
@@ -1769,49 +1723,51 @@
     };
     input.click();
   });
-  const refreshDashboardSelection = () => {
-    const val = getDashboardYearSelection();
+  document.getElementById("yearSelect").addEventListener("change", (e) => {
+    const val = e.target.value;
     updateKPI(val);
     renderAllCharts(val);
-  };
-  document.getElementById("yearSelect").addEventListener("change", refreshDashboardSelection);
-  document.getElementById("compareYearSelect").addEventListener("change", refreshDashboardSelection);
-  document.querySelectorAll(".mno-checkbox").forEach(input => input.addEventListener("change", refreshDashboardSelection));
+  });
+  document.getElementById("networkSelect").addEventListener("change", () => {
+    const val = document.getElementById("yearSelect").value;
+    updateKPI(val);
+    renderAllCharts(val);
+  });
   document.getElementById("tableYearFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildFinancialTable(selectedYear);
   });
   document.getElementById("tableCompanyFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildFinancialTable(selectedYear);
   });
   document.getElementById("tableItemFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildFinancialTable(selectedYear);
   });
   document.getElementById("marketShareMetricFilter").addEventListener("change", (e) => {
     activeMarketShareMetric = e.target.value || "revenue";
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     renderMarketShareAnalytics(selectedYear);
   });
   document.getElementById("marketShareTableYearFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildMarketShareTable(selectedYear);
   });
   document.getElementById("marketShareTableCompanyFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildMarketShareTable(selectedYear);
   });
   document.getElementById("regulatoryTableYearFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildRegulatoryFeeTable(selectedYear);
   });
   document.getElementById("regulatoryTableCompanyFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildRegulatoryFeeTable(selectedYear);
   });
   document.getElementById("regulatoryTableItemFilter").addEventListener("change", () => {
-    const selectedYear = getDashboardYearSelection();
+    const selectedYear = document.getElementById("yearSelect").value || "all";
     buildRegulatoryFeeTable(selectedYear);
   });
   document.querySelectorAll(".profit-metric-btn").forEach(btn => {
@@ -1819,7 +1775,7 @@
       activeProfitMetric = btn.dataset.profitMetric || "netProfit";
       document.querySelectorAll(".profit-metric-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      const selectedYear = getDashboardYearSelection();
+      const selectedYear = document.getElementById("yearSelect").value || "all";
       renderAllCharts(selectedYear);
     });
   });
@@ -1828,9 +1784,8 @@
       activeTrendMetric = btn.dataset.trendMetric || "operatingEfficiency";
       document.querySelectorAll(".trend-metric-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      const selectedYear = getDashboardYearSelection();
-      renderTrendAnalysisChart(selectedYear);
-      updateInsightsPanel(selectedYear);
+      renderTrendAnalysisChart();
+      updateInsightsPanel(document.getElementById("yearSelect").value || "all");
     });
   });
   document.getElementById("runPredictionBtn").addEventListener("click", runPrediction);
@@ -1851,7 +1806,7 @@
   document.getElementById("downloadRegFeeBtn").onclick = () => downloadChart("regulatoryFeeChart","regulatory_fees_received");
   document.getElementById("downloadRegRateBtn").onclick = () => downloadChart("regulatoryFeeRateChart","regulatory_fee_to_revenue");
   document.getElementById("downloadTableBtn").onclick = () => {
-    const sel = getDashboardYearSelection();
+    const sel = document.getElementById("yearSelect").value || "all";
     const selectedYears = getTableYears(sel);
     const tableItems = getTableItems();
     const tableCompanies = getTableCompanies();
