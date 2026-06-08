@@ -157,39 +157,6 @@
     </div>
   </div>
 
-  <div class="insights-card">
-    <div class="insights-header">
-      <h3><i class="fas fa-receipt"></i> 1% Fee Payment Analytics</h3>
-      <span class="insights-pill" id="feeScope">Dashboard selection</span>
-    </div>
-    <div class="kpi-grid" id="feeKpiContainer"></div>
-  </div>
-
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Invoices Issued vs Payments Received</h3>
-        <button class="download-btn" id="downloadFeePaymentBtn"><i class="fas fa-camera"></i> Download</button>
-      </div>
-      <canvas id="feePaymentChart"></canvas>
-    </div>
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Collection Rate</h3>
-        <button class="download-btn" id="downloadFeeRateBtn"><i class="fas fa-camera"></i> Download</button>
-      </div>
-      <canvas id="feeRateChart"></canvas>
-    </div>
-  </div>
-
-  <div class="chart-card full">
-    <div class="chart-header">
-      <h3>1% Fee Payment Data</h3>
-      <button class="download-btn" id="downloadFeeTableBtn"><i class="fas fa-download"></i> Export CSV</button>
-    </div>
-    <div class="financial-table-wrapper" id="feeTableContainer"></div>
-  </div>
-
   <div class="chart-card full">
     <div class="chart-header">
       <h3>Complete Financial Data</h3>
@@ -234,7 +201,7 @@
 </div>
 
 <script>
-  const CACHE_KEY = "fiberFinancialDashboardSnapshot_v3";
+  const CACHE_KEY = "fiberFinancialDashboardSnapshot_v2";
   const NOTES_KEY = "fiberFinancialDashboardNotes_v1";
   const COMPANY_NAME = "Fiber Operators";
   const COMPANIES = ["Spectrum Fibre", "C Squared", "Comsys", "GRIDCo", "Main One"];
@@ -261,19 +228,11 @@
     { key: "totalDebt", label: "Total Debt", type: "money", aliases: ["TOTAL DEBT"] },
     { key: "enterpriseValue", label: "Total Enterprise Value", type: "money", aliases: ["TOTAL ENTERPRISE VALUE", "ENTERPRISE VALUE"] }
   ];
-  const regulatoryRows = [
-    { key: "invoiceIssued", label: "Invoice Issued", type: "money" },
-    { key: "paymentReceived", label: "Payment Received", type: "money" },
-    { key: "paymentGap", label: "Outstanding / Overpayment", type: "money" },
-    { key: "collectionRate", label: "Collection Rate", type: "percent" }
-  ];
 
   const DEFAULT_PAYLOAD = {"version":1,"savedAt":"embedded-from-fibre-financial-extracts","years":[2021,2022,2023,2024,2025],"companies":["Spectrum Fibre","C Squared","Comsys","GRIDCo","Main One"],"financial":{"2021":{"Spectrum Fibre":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"C Squared":{"revenue":34005700,"expenditure":16243906,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":-26978107,"capex":null,"netProfitMargin":-0.7933407340534087,"netProfitBeforeTax":-21929460,"currentAssets":38418512,"nonCurrentAssets":112023534,"totalAssets":150442046,"currentLiabilities":15331949,"nonCurrentLiabilities":262417644,"totalLiabilities":277749593,"cash":17135675,"totalEquity":-127307547,"totalDebt":null,"enterpriseValue":-144443222},"Comsys":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"GRIDCo":{"revenue":1278768,"expenditure":null,"costOfSales":387412,"grossProfit":891356,"ebitda":null,"ebitdaMargin":null,"netProfit":197521,"capex":null,"netProfitMargin":0.1544619508777198,"netProfitBeforeTax":1296,"currentAssets":1718251,"nonCurrentAssets":5504215,"totalAssets":7222466,"currentLiabilities":2452653,"nonCurrentLiabilities":1991752,"totalLiabilities":4444405,"cash":494300,"totalEquity":2778061,"totalDebt":1690020,"enterpriseValue":3973781},"Main One":{"revenue":33264249,"expenditure":null,"costOfSales":19620421,"grossProfit":13643828,"ebitda":null,"ebitdaMargin":null,"netProfit":-3499171,"capex":null,"netProfitMargin":-0.10519314595077736,"netProfitBeforeTax":-1765201,"currentAssets":16731275,"nonCurrentAssets":53393105,"totalAssets":70124380,"currentLiabilities":18683104,"nonCurrentLiabilities":37919980,"totalLiabilities":56603084,"cash":3931536,"totalEquity":13521296,"totalDebt":20200013,"enterpriseValue":29789773}},"2022":{"Spectrum Fibre":{"revenue":13011000,"expenditure":68814000,"costOfSales":8867000,"grossProfit":4144000,"ebitda":-64669000,"ebitdaMargin":-4.970332795327031,"netProfit":-107646000,"capex":null,"netProfitMargin":-8.273460917685036,"netProfitBeforeTax":null,"currentAssets":9204000,"nonCurrentAssets":522547000,"totalAssets":531750000,"currentLiabilities":79957000,"nonCurrentLiabilities":305707000,"totalLiabilities":385665000,"cash":1929000,"totalEquity":146086000,"totalDebt":54893000,"enterpriseValue":199050000},"C Squared":{"revenue":47584630,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":-101255516,"capex":null,"netProfitMargin":-2.1279038210447365,"netProfitBeforeTax":null,"currentAssets":34961000,"nonCurrentAssets":109762149,"totalAssets":144723149,"currentLiabilities":28308512,"nonCurrentLiabilities":344977700,"totalLiabilities":373286212,"cash":2823802,"totalEquity":-228563063,"totalDebt":null,"enterpriseValue":-231386865},"Comsys":{"revenue":71274753,"expenditure":20071363,"costOfSales":41131608,"grossProfit":30143144,"ebitda":null,"ebitdaMargin":null,"netProfit":5370565,"capex":null,"netProfitMargin":0.07535017343378236,"netProfitBeforeTax":9158320,"currentAssets":94252132,"nonCurrentAssets":37257293,"totalAssets":131509425,"currentLiabilities":34563048,"nonCurrentLiabilities":null,"totalLiabilities":34563048,"cash":6856450,"totalEquity":96946376,"totalDebt":null,"enterpriseValue":90089926},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":36775713,"expenditure":null,"costOfSales":26475714,"grossProfit":10299999,"ebitda":null,"ebitdaMargin":null,"netProfit":-23558652,"capex":null,"netProfitMargin":-0.6406035417994479,"netProfitBeforeTax":null,"currentAssets":35545578,"nonCurrentAssets":46527300,"totalAssets":82072878,"currentLiabilities":45748636,"nonCurrentLiabilities":46361598,"totalLiabilities":92110234,"cash":19359195,"totalEquity":-10037356,"totalDebt":36816229,"enterpriseValue":7419678}},"2023":{"Spectrum Fibre":{"revenue":14206000,"expenditure":50919000,"costOfSales":13308000,"grossProfit":898000,"ebitda":-50021000,"ebitdaMargin":-0.035211178375334364,"netProfit":-120011000,"capex":2003000,"netProfitMargin":-0.0844790933408419,"netProfitBeforeTax":-120011000,"currentAssets":19576000,"nonCurrentAssets":493974000,"totalAssets":513550000,"currentLiabilities":62768000,"nonCurrentLiabilities":424733000,"totalLiabilities":487501000,"cash":3129000,"totalEquity":26049000,"totalDebt":382703000,"enterpriseValue":405623000},"C Squared":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Comsys":{"revenue":76051384,"expenditure":27077607,"costOfSales":43109115,"grossProfit":32942269,"ebitda":7324558,"ebitdaMargin":0.09631064702254465,"netProfit":2022237,"capex":null,"netProfitMargin":0.026590403667078565,"netProfitBeforeTax":4424072,"currentAssets":82280460,"nonCurrentAssets":40369046,"totalAssets":122649506,"currentLiabilities":28073782,"nonCurrentLiabilities":null,"totalLiabilities":28073782,"cash":4791840,"totalEquity":94575724,"totalDebt":2525384,"enterpriseValue":92309268},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":43561494,"expenditure":18654822,"costOfSales":22294153,"grossProfit":21267341,"ebitda":2751297,"ebitdaMargin":0.06315892195983912,"netProfit":-2024419,"capex":2000954,"netProfitMargin":-0.04647267148367317,"netProfitBeforeTax":-2024419,"currentAssets":22739297,"nonCurrentAssets":47030325,"totalAssets":69769622,"currentLiabilities":23688297,"nonCurrentLiabilities":8429588,"totalLiabilities":32117885,"cash":6884646,"totalEquity":37651737,"totalDebt":null,"enterpriseValue":30767091}},"2024":{"Spectrum Fibre":{"revenue":259141000,"expenditure":202942000,"costOfSales":72369000,"grossProfit":186772000,"ebitda":-16170000,"ebitdaMargin":-0.062398462613017625,"netProfit":-161227000,"capex":106367000,"netProfitMargin":-0.6221593649789111,"netProfitBeforeTax":-90218000,"currentAssets":385409000,"nonCurrentAssets":1147700000,"totalAssets":1533109000,"currentLiabilities":303052000,"nonCurrentLiabilities":1284018000,"totalLiabilities":1587070000,"cash":159952000,"totalEquity":-53961000,"totalDebt":1149671000,"enterpriseValue":935758000},"C Squared":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Comsys":{"revenue":112425731,"expenditure":35509599,"costOfSales":64448340,"grossProfit":47977391,"ebitda":13180679,"ebitdaMargin":0.11723898864397866,"netProfit":5426329,"capex":null,"netProfitMargin":0.04826589920060204,"netProfitBeforeTax":9586681,"currentAssets":120497512,"nonCurrentAssets":45311665,"totalAssets":165809177,"currentLiabilities":71207124,"nonCurrentLiabilities":null,"totalLiabilities":71207124,"cash":27416208,"totalEquity":94602053,"totalDebt":3119426,"enterpriseValue":70305271},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":56310197,"expenditure":33307086,"costOfSales":36331571,"grossProfit":19978626,"ebitda":-7987875,"ebitdaMargin":-0.14185485801088565,"netProfit":-10767635,"capex":2552421,"netProfitMargin":-0.1912199845438296,"netProfitBeforeTax":-10767635,"currentAssets":77314193,"nonCurrentAssets":42636243,"totalAssets":119950436,"currentLiabilities":79707975,"nonCurrentLiabilities":13358358,"totalLiabilities":93066333,"cash":17025092,"totalEquity":26884103,"totalDebt":50931531,"enterpriseValue":60790542}},"2025":{"Spectrum Fibre":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"C Squared":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Comsys":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"GRIDCo":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null},"Main One":{"revenue":null,"expenditure":null,"costOfSales":null,"grossProfit":null,"ebitda":null,"ebitdaMargin":null,"netProfit":null,"capex":null,"netProfitMargin":null,"netProfitBeforeTax":null,"currentAssets":null,"nonCurrentAssets":null,"totalAssets":null,"currentLiabilities":null,"nonCurrentLiabilities":null,"totalLiabilities":null,"cash":null,"totalEquity":null,"totalDebt":null,"enterpriseValue":null}}}};
-  const DEFAULT_REGULATORY_FEES = {"2021":{"Spectrum Fibre":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"C Squared":{"invoiceIssued":340057,"paymentReceived":172006.64,"paymentGap":168050.36,"collectionRate":0.5058170836065719},"Comsys":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"GRIDCo":{"invoiceIssued":12787.68,"paymentReceived":null,"paymentGap":12787.68,"collectionRate":null},"Main One":{"invoiceIssued":332642.49,"paymentReceived":332642.19,"paymentGap":0.29999999998835847,"collectionRate":0.9999990981308492}},"2022":{"Spectrum Fibre":{"invoiceIssued":130110,"paymentReceived":null,"paymentGap":130110,"collectionRate":null},"C Squared":{"invoiceIssued":475846.3,"paymentReceived":461637.46,"paymentGap":14208.839999999967,"collectionRate":0.9701398539822629},"Comsys":{"invoiceIssued":712747.53,"paymentReceived":null,"paymentGap":712747.53,"collectionRate":null},"GRIDCo":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"Main One":{"invoiceIssued":367757.13,"paymentReceived":367757.13,"paymentGap":0,"collectionRate":1}},"2023":{"Spectrum Fibre":{"invoiceIssued":142060,"paymentReceived":null,"paymentGap":142060,"collectionRate":null},"C Squared":{"invoiceIssued":null,"paymentReceived":577339.05,"paymentGap":-577339.05,"collectionRate":null},"Comsys":{"invoiceIssued":760513.84,"paymentReceived":null,"paymentGap":760513.84,"collectionRate":null},"GRIDCo":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"Main One":{"invoiceIssued":435614.94,"paymentReceived":435614.94,"paymentGap":0,"collectionRate":1}},"2024":{"Spectrum Fibre":{"invoiceIssued":2591410,"paymentReceived":null,"paymentGap":2591410,"collectionRate":null},"C Squared":{"invoiceIssued":null,"paymentReceived":808186.58,"paymentGap":-808186.58,"collectionRate":null},"Comsys":{"invoiceIssued":1124257.31,"paymentReceived":1124257.32,"paymentGap":-0.010000000009313226,"collectionRate":1.000000008894761},"GRIDCo":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"Main One":{"invoiceIssued":563101.97,"paymentReceived":437254.24,"paymentGap":125847.72999999998,"collectionRate":0.7765098744016115}},"2025":{"Spectrum Fibre":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"C Squared":{"invoiceIssued":null,"paymentReceived":655980.09,"paymentGap":-655980.09,"collectionRate":null},"Comsys":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"GRIDCo":{"invoiceIssued":null,"paymentReceived":null,"paymentGap":null,"collectionRate":null},"Main One":{"invoiceIssued":null,"paymentReceived":393361.54,"paymentGap":-393361.54,"collectionRate":null}}};
 
   let currentPayload = loadPayload() || DEFAULT_PAYLOAD;
   let financialData = currentPayload.financial || {};
-  let regulatoryFees = currentPayload.regulatoryFees || DEFAULT_REGULATORY_FEES;
   let companiesList = currentPayload.companies || COMPANIES;
   let yearsList = normalizeYears(currentPayload.years || Object.keys(financialData));
   let charts = {};
@@ -315,28 +274,6 @@
 
   function companyTotalInScope(company, key, years = yearScope(selectedYear())) {
     return years.reduce((sum, year) => sum + (moneyValue(financialData[String(year)]?.[company]?.[key]) || 0), 0);
-  }
-
-  function regulatoryValue(year, company, key) {
-    return moneyValue(regulatoryFees[String(year)]?.[company]?.[key]);
-  }
-
-  function hasRegulatoryRecord(year, company) {
-    const d = regulatoryFees[String(year)]?.[company] || {};
-    return regulatoryRows.some(row => hasValue(d[row.key]));
-  }
-
-  function regulatoryTotalInScope(company, key, years = yearScope(selectedYear())) {
-    return years.reduce((sum, year) => sum + (regulatoryValue(year, company, key) || 0), 0);
-  }
-
-  function aggregateRegulatoryValue(year, key, companies = getSelectedCompanies()) {
-    return companies.reduce((sum, company) => sum + (regulatoryValue(year, company, key) || 0), 0);
-  }
-
-  function regulatoryYearsInScope(yearValue) {
-    const activeCompanies = getSelectedCompanies();
-    return yearScope(yearValue).filter(year => activeCompanies.some(company => hasRegulatoryRecord(year, company)));
   }
 
   function populatedCompanies(year) {
@@ -588,95 +525,6 @@
     });
   }
 
-  function renderRegulatoryFees(yearValue) {
-    const activeCompanies = getSelectedCompanies();
-    const scopeYears = regulatoryYearsInScope(yearValue);
-    const companyLabel = activeCompanies.length === companiesList.length ? "All companies" : activeCompanies.join(", ");
-    const scope = document.getElementById("feeScope");
-    if(scope) scope.textContent = `${companyLabel} | ${selectionLabel(yearValue)}`;
-    const totalInvoice = scopeYears.reduce((sum, year) => sum + aggregateRegulatoryValue(year, "invoiceIssued", activeCompanies), 0);
-    const totalPayment = scopeYears.reduce((sum, year) => sum + aggregateRegulatoryValue(year, "paymentReceived", activeCompanies), 0);
-    const paymentGap = totalInvoice - totalPayment;
-    const collectionRate = totalInvoice ? totalPayment / totalInvoice : null;
-    const topPayment = activeCompanies
-      .map(company => ({ company, value: regulatoryTotalInScope(company, "paymentReceived", scopeYears) }))
-      .filter(item => item.value !== 0 || scopeYears.some(year => hasRegulatoryRecord(year, item.company)))
-      .sort((a, b) => b.value - a.value)[0];
-    const cards = [
-      ["Invoices Issued", formatMoney(totalInvoice), `${scopeYears.length || 0} year(s) in selected scope`],
-      ["Payments Received", formatMoney(totalPayment), "1% fee receipts recorded"],
-      ["Outstanding / Overpayment", formatMoney(paymentGap), paymentGap < 0 ? "Payments exceed invoices in this scope" : "Invoices less payments received"],
-      ["Collection Rate", formatPercent(collectionRate), "Payments received divided by invoices issued"],
-      ["Top Fee Payer", topPayment ? topPayment.company : "N/A", topPayment ? formatMoney(topPayment.value) : "No populated fee records"],
-      ["Companies Selected", String(activeCompanies.length), companyLabel]
-    ];
-    document.getElementById("feeKpiContainer").innerHTML = cards.map(card => `<div class="kpi-card"><div class="kpi-title">${card[0]}</div><div class="kpi-value">${card[1]}</div><div class="kpi-sub">${card[2]}</div></div>`).join("");
-    renderRegulatoryCharts(yearValue, scopeYears, activeCompanies);
-    buildRegulatoryFeeTable(scopeYears, activeCompanies);
-  }
-
-  function renderRegulatoryCharts(yearValue, scopeYears, activeCompanies) {
-    const isMultiYear = scopeYears.length > 1;
-    const chartYear = scopeYears[0] || latestYearInScope(yearValue);
-    const labels = isMultiYear ? scopeYears.map(String) : activeCompanies;
-    if(charts.feePaymentChart) charts.feePaymentChart.destroy();
-    if(charts.feeRateChart) charts.feeRateChart.destroy();
-    const companySeries = key => activeCompanies.map(company => ({
-      label: `${company} ${key === "invoiceIssued" ? "Invoices" : "Payments"}`,
-      data: scopeYears.map(year => chartMoney(regulatoryValue(year, company, key))),
-      borderColor: companyColors[company],
-      backgroundColor: companyColors[company] + (key === "invoiceIssued" ? "55" : "AA"),
-      tension: 0.25
-    }));
-    charts.feePaymentChart = new Chart(document.getElementById("feePaymentChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? [...companySeries("invoiceIssued"), ...companySeries("paymentReceived")] : [
-        { label: "Invoice Issued (GHS M)", data: activeCompanies.map(company => chartMoney(regulatoryValue(chartYear, company, "invoiceIssued"))), backgroundColor: activeCompanies.map(company => companyColors[company] + "66") },
-        { label: "Payment Received (GHS M)", data: activeCompanies.map(company => chartMoney(regulatoryValue(chartYear, company, "paymentReceived"))), backgroundColor: activeCompanies.map(company => companyColors[company]) }
-      ] },
-      options: { responsive: true, scales: { y: { title: { display: true, text: "GHS Millions", color: "#FFD966" } } } }
-    });
-    charts.feeRateChart = new Chart(document.getElementById("feeRateChart"), {
-      type: isMultiYear ? "line" : "bar",
-      data: { labels, datasets: isMultiYear ? activeCompanies.map(company => ({
-        label: `${company} Collection Rate`,
-        data: scopeYears.map(year => {
-          const invoice = regulatoryValue(year, company, "invoiceIssued");
-          const payment = regulatoryValue(year, company, "paymentReceived");
-          return invoice ? (payment || 0) / invoice * 100 : null;
-        }),
-        borderColor: companyColors[company],
-        backgroundColor: "transparent",
-        tension: 0.25
-      })) : [
-        { label: "Collection Rate", data: activeCompanies.map(company => {
-          const invoice = regulatoryValue(chartYear, company, "invoiceIssued");
-          const payment = regulatoryValue(chartYear, company, "paymentReceived");
-          return invoice ? (payment || 0) / invoice * 100 : null;
-        }), backgroundColor: activeCompanies.map(company => companyColors[company]) }
-      ] },
-      options: { responsive: true, scales: { y: { title: { display: true, text: "Percent", color: "#FFD966" } } } }
-    });
-  }
-
-  function buildRegulatoryFeeTable(scopeYears = regulatoryYearsInScope(selectedYear()), activeCompanies = getSelectedCompanies()) {
-    const container = document.getElementById("feeTableContainer");
-    if(!container) return;
-    if(!scopeYears.length) {
-      container.innerHTML = '<div class="empty-table-note">No 1% fee payment data available for the selected companies and years.</div>';
-      return;
-    }
-    let html = `<table><thead><tr><th>Year</th><th>1% Fee Item</th>${activeCompanies.map(company => `<th style="color:${companyColors[company] || "#5DE4C7"};">${company}</th>`).join("")}</tr></thead><tbody>`;
-    scopeYears.forEach(year => {
-      regulatoryRows.forEach(item => {
-        const values = activeCompanies.map(company => `<td>${formatByType(regulatoryFees[String(year)]?.[company]?.[item.key], item.type)}</td>`).join("");
-        html += `<tr><td style="font-weight:900; color:#5DE4C7;">${year}</td><td class="item-name">${item.label}</td>${values}</tr>`;
-      });
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
-  }
-
   function getTableYears() {
     const mode = document.getElementById("tableYearFilter").value;
     if(mode === "all") return yearsList;
@@ -711,7 +559,6 @@
     updateKpis(selectedYear());
     updateInsights(selectedYear());
     renderCharts(selectedYear());
-    renderRegulatoryFees(selectedYear());
     buildTable();
   }
 
@@ -747,46 +594,6 @@
       }
     }
     return null;
-  }
-
-  function emptyRegulatoryRecord() {
-    return { invoiceIssued: null, paymentReceived: null, paymentGap: null, collectionRate: null };
-  }
-
-  function parseRegulatoryFees(workbook, companyAliases, parsedYears) {
-    const sheetAliases = {
-      "Spectrum Fibre": ["1% SPECTRUM", "1% SPECTRUM FIBRE"],
-      "C Squared": ["1% CSQUARED", "1% C SQUARED", "1% C-SQUARED"],
-      "Comsys": ["1% COMSYS"],
-      "GRIDCo": ["1% GRIDCO"],
-      "Main One": ["1% MAIN ONE", "1% MAINONE"]
-    };
-    const fees = {};
-    parsedYears.forEach(year => {
-      fees[String(year)] = {};
-      companyAliases.forEach(company => { fees[String(year)][company.name] = emptyRegulatoryRecord(); });
-    });
-    companyAliases.forEach(company => {
-      const sheetName = workbook.SheetNames.find(name => (sheetAliases[company.name] || []).some(alias => normalizeLabel(name) === normalizeLabel(alias)));
-      if(!sheetName) return;
-      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: "", raw: true });
-      let currentYear = null;
-      rows.forEach(row => {
-        row.forEach(cell => {
-          const match = String(cell || "").trim().match(/^(20\d{2})$/);
-          if(match) currentYear = Number(match[1]);
-        });
-        const totalIndex = row.findIndex(cell => normalizeLabel(cell) === "YEAR TOTAL");
-        if(totalIndex === -1 || !currentYear) return;
-        if(!fees[String(currentYear)]) fees[String(currentYear)] = {};
-        const invoiceIssued = parseNumeric(row[totalIndex + 2], "money");
-        const paymentReceived = parseNumeric(row[totalIndex + 3], "money");
-        const paymentGap = invoiceIssued !== null || paymentReceived !== null ? (invoiceIssued || 0) - (paymentReceived || 0) : null;
-        const collectionRate = invoiceIssued ? (paymentReceived || 0) / invoiceIssued : null;
-        fees[String(currentYear)][company.name] = { invoiceIssued, paymentReceived, paymentGap, collectionRate };
-      });
-    });
-    return fees;
   }
 
   async function parseWorkbook(file) {
@@ -846,9 +653,7 @@
             });
             parsed[String(marker.year)] = yearData;
           });
-          const parsedYears = yearMarkers.map(item => item.year);
-          const parsedRegulatoryFees = parseRegulatoryFees(workbook, companyAliases, parsedYears);
-          resolve({ version: 1, savedAt: new Date().toISOString(), years: parsedYears, companies: companyAliases.map(item => item.name), financial: parsed, regulatoryFees: parsedRegulatoryFees });
+          resolve({ version: 1, savedAt: new Date().toISOString(), years: yearMarkers.map(item => item.year), companies: companyAliases.map(item => item.name), financial: parsed });
         } catch(error) {
           reject(error);
         }
@@ -915,25 +720,12 @@
     oldYears.forEach(year => {
       if(!newYears.includes(year)) changes.push(`${year} exists in the dashboard but was not present in the uploaded workbook.`);
     });
-    newYears.forEach(year => {
-      (newPayload.companies || companiesList).forEach(company => {
-        regulatoryRows.forEach(item => {
-          const oldVal = comparableValue(oldPayload?.regulatoryFees?.[String(year)]?.[company]?.[item.key]);
-          const newVal = comparableValue(newPayload?.regulatoryFees?.[String(year)]?.[company]?.[item.key]);
-          if(oldVal === null && newVal === null) return;
-          if(oldVal === null || newVal === null || Math.abs(oldVal - newVal) > 0.000001) {
-            changes.push(`${year} ${company} 1% Fee ${item.label}: ${formatByType(oldVal, item.type)} changed to ${formatByType(newVal, item.type)}.`);
-          }
-        });
-      });
-    });
     return changes;
   }
 
   function applyPayload(payload) {
     currentPayload = payload;
     financialData = payload.financial || {};
-    regulatoryFees = payload.regulatoryFees || DEFAULT_REGULATORY_FEES;
     companiesList = payload.companies || COMPANIES;
     yearsList = normalizeYears(payload.years || Object.keys(financialData));
     renderAll();
@@ -986,24 +778,6 @@
     URL.revokeObjectURL(link.href);
   }
 
-  function exportRegulatoryFeeCsv() {
-    const activeCompanies = getSelectedCompanies();
-    const rows = [["Year", "1% Fee Item", ...activeCompanies]];
-    regulatoryYearsInScope(selectedYear()).forEach(year => {
-      regulatoryRows.forEach(item => rows.push([year, item.label, ...activeCompanies.map(company => {
-        const value = regulatoryFees[String(year)]?.[company]?.[item.key];
-        return hasValue(value) ? value : "";
-      })]));
-    });
-    const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "fiber_1_percent_fee_data.csv";
-    link.click();
-    URL.revokeObjectURL(link.href);
-  }
-
   setChartDefaults();
   document.getElementById("uploadWorkbookBtn").addEventListener("click", () => {
     const input = document.createElement("input");
@@ -1028,10 +802,7 @@
   document.getElementById("downloadSpendBtn").onclick = () => downloadChart("spendChart", "fiber_spend");
   document.getElementById("downloadBalanceBtn").onclick = () => downloadChart("balanceChart", "fiber_balance_sheet");
   document.getElementById("downloadEvBtn").onclick = () => downloadChart("enterpriseChart", "fiber_enterprise_value");
-  document.getElementById("downloadFeePaymentBtn").onclick = () => downloadChart("feePaymentChart", "fiber_1_percent_fee_payments");
-  document.getElementById("downloadFeeRateBtn").onclick = () => downloadChart("feeRateChart", "fiber_1_percent_fee_collection_rate");
   document.getElementById("downloadTableBtn").onclick = exportCsv;
-  document.getElementById("downloadFeeTableBtn").onclick = exportRegulatoryFeeCsv;
   loadNotes();
   renderAll();
 </script>
