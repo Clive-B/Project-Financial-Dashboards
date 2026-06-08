@@ -117,7 +117,6 @@
     <div class="controls">
       <button class="upload-btn" id="uploadExcelBtn"><i class="fas fa-file-excel"></i> Upload Financial Workbook</button>
       <button class="upload-btn" id="uploadRegulatoryExcelBtn"><i class="fas fa-receipt"></i> Upload Regulatory Fee Workbook</button>
-      <button class="upload-btn" id="uploadOnePercentFeeBtn"><i class="fas fa-percent"></i> Upload 1% Fee</button>
       <div class="year-selector">
         <label><i class="fas fa-calendar-alt"></i> Year:</label>
         <select id="yearSelect"></select>
@@ -867,85 +866,6 @@
     });
   }
 
-  async function parseOnePercentFeeWorkbook(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array", cellDates: false, raw: true });
-          const clean = (v) => (v === undefined || v === null) ? "" : String(v).trim();
-          const cleanUpper = (v) => clean(v).toUpperCase();
-          const parsed = {};
-
-          workbook.SheetNames.forEach(sheetName => {
-            const company = normalizeCompanyName(sheetName);
-            if(!company) return;
-
-            const sheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
-            let currentYear = null;
-            let periodCol = -1, invoiceCol = -1, paymentCol = -1;
-
-            rows.forEach(row => {
-              row.forEach(cell => {
-                const value = clean(cell);
-                if(/^\d{4}$/.test(value)) {
-                  currentYear = Number(value);
-                  if(!parsed[currentYear]) {
-                    parsed[currentYear] = {
-                      MTN: { invoiceIssued: 0, paymentReceived: 0, outstanding: 0, feeToRevenue: 0 },
-                      Telecel: { invoiceIssued: 0, paymentReceived: 0, outstanding: 0, feeToRevenue: 0 },
-                      AT: { invoiceIssued: 0, paymentReceived: 0, outstanding: 0, feeToRevenue: 0 }
-                    };
-                  }
-                }
-              });
-
-              const upperRow = row.map(cleanUpper);
-              const pIdx = upperRow.findIndex(x => x === "PERIOD");
-              const iIdx = upperRow.findIndex(x => x.includes("INVOICE") && x.includes("ISSUED"));
-              const payIdx = upperRow.findIndex(x => x.includes("PAYMENT") && x.includes("RECEIVED"));
-              if(pIdx >= 0 && iIdx >= 0 && payIdx >= 0) {
-                periodCol = pIdx;
-                invoiceCol = iIdx;
-                paymentCol = payIdx;
-                return;
-              }
-
-              const period = periodCol >= 0 ? cleanUpper(row[periodCol]) : "";
-              if(currentYear && period === "YEAR TOTAL" && invoiceCol >= 0 && paymentCol >= 0 && parsed[currentYear]?.[company]) {
-                parsed[currentYear][company].invoiceIssued = parseNumberValue(row[invoiceCol]);
-                parsed[currentYear][company].paymentReceived = parseNumberValue(row[paymentCol]);
-              }
-            });
-          });
-
-          const validYears = Object.keys(parsed).map(Number).sort((a,b)=>a-b);
-          if(validYears.length === 0) {
-            reject("No 1% fee year totals were found in MTN, TELECEL, or AT sheets.");
-            return;
-          }
-
-          validYears.forEach(year => {
-            companies.forEach(comp => {
-              const d = parsed[year][comp];
-              d.outstanding = d.invoiceIssued - d.paymentReceived;
-              const revenue = financialData[year]?.[comp]?.revenue || 0;
-              d.feeToRevenue = revenue ? d.paymentReceived / revenue : 0;
-            });
-          });
-
-          resolve({ regulatory: parsed, years: validYears });
-        } catch(err) {
-          reject(err);
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(file);
-    });
-  }
-
   function buildRegulatoryPayload(regulatory, years) {
     return { version: 1, savedAt: new Date().toISOString(), regulatory, years };
   }
@@ -1394,20 +1314,6 @@
     }
   }
 
-  async function handleOnePercentFeeUpload(file) {
-    try {
-      const { regulatory, years } = await parseOnePercentFeeWorkbook(file);
-      const payload = buildRegulatoryPayload(regulatory, years);
-      saveRegulatoryPayload(payload);
-      applyRegulatoryPayload(payload, true);
-      const output = document.getElementById("predictionOutput");
-      if(output) output.innerHTML = `✅ 1% fee workbook captured. The regulatory fee analytics now use the company-tab workbook totals.`;
-    } catch(err) {
-      alert("Error parsing 1% fee workbook: " + (err.message || err));
-      console.error(err);
-    }
-  }
-
 
   // ---------- Rendering all UI (same logic as before but using dynamic data) ----------
   function updateKPI(selectedYear) {
@@ -1838,20 +1744,6 @@
       if(e.target.files.length) {
         const selectedFile = e.target.files[0];
         handleRegulatoryExcelUpload(selectedFile);
-        e.target.value = "";
-      }
-    };
-    input.click();
-  });
-  document.getElementById("uploadOnePercentFeeBtn").addEventListener("click", () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".xlsx, .xls";
-    input.value = "";
-    input.onchange = (e) => {
-      if(e.target.files.length) {
-        const selectedFile = e.target.files[0];
-        handleOnePercentFeeUpload(selectedFile);
         e.target.value = "";
       }
     };
